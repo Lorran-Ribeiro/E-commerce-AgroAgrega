@@ -45,12 +45,16 @@ describe('StoreBenefitsComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should render the two real coupons from the cart service catalog', () => {
+  it('should render all coupons from the cart service catalog', () => {
     const host = fixture.nativeElement as HTMLElement;
 
-    expect(host.querySelectorAll('.coupon-card')).toHaveLength(2);
+    expect(host.querySelectorAll('.coupon-card')).toHaveLength(6);
     expect(host.textContent).toContain('AGRO20');
     expect(host.textContent).toContain('BEMVINDO10');
+    expect(host.textContent).toContain('CAMPO15');
+    expect(host.textContent).toContain('SAFRA12');
+    expect(host.textContent).toContain('EQUIPA10');
+    expect(host.textContent).toContain('AGUA8');
   });
 
   it('should apply an available coupon directly to the cart', () => {

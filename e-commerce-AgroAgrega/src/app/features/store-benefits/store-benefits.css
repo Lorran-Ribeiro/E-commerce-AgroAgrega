@@ -368,6 +368,13 @@
   font-weight: 900;
 }
 
+.benefits-disclaimer {
+  margin: 18px 4px 0;
+  color: #6d7d74;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
 .advantage-icon--leaf::before {
   width: 17px;
   height: 23px;

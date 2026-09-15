@@ -58,12 +58,14 @@
       type="button"
       (click)="adicionarAoCarrinho(produto)"
     >
-      @if (produtoAdicionadoId() === produto.id) {
-        Adicionado ✓
-      } @else {
-        Adicionar ao Carrinho
-      }
+      Adicionar
     </button>
+
+    @if (produtoAdicionadoId() === produto.id) {
+      <span class="product-added-feedback" role="status">
+        Produto adicionado ao carrinho.
+      </span>
+    }
 
   </article>
 }

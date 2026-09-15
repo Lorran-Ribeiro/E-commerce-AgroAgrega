@@ -25,6 +25,14 @@ describe('Cart', () => {
     rating: 5,
     images: [],
   };
+  const product2: ProductModel = {
+    ...product1,
+    id: '2',
+    title: 'Produto em oferta',
+    price: 20,
+    originalPrice: 25,
+    brand: 'AgroSense',
+  };
   it('deve adicionar um produto ao carrinho', () => {
     service.addCartItem(product1);
     const items = service.getCartItems()();
@@ -129,5 +137,31 @@ describe('Cart', () => {
     service.removeCoupon();
     expect(service.coupon()).toBeNull();
     expect(service.total()).toBe(10);
+  });
+  it('deve calcular o resumo somente com os produtos selecionados', () => {
+    service.addCartItem(product1);
+    service.addCartItem(product2);
+    service.setProductSelected(product1.id, false);
+    service.applyCoupon('BEMVINDO10');
+
+    expect(service.selectedItemsCount()).toBe(1);
+    expect(service.selectedSubtotal()).toBe(20);
+    expect(service.selectedOriginalSubtotal()).toBe(25);
+    expect(service.selectedProductDiscount()).toBe(5);
+    expect(service.selectedCouponDiscount()).toBe(2);
+    expect(service.selectedTotal()).toBe(18);
+    expect(service.selectedPixDiscount()).toBeCloseTo(1.8);
+    expect(service.selectedPixTotal()).toBeCloseTo(16.2);
+  });
+
+  it('deve remover após a compra apenas os produtos selecionados', () => {
+    service.addCartItem(product1);
+    service.addCartItem(product2);
+    service.setProductSelected(product1.id, false);
+
+    service.removeSelectedItems();
+
+    expect(service.getCartItems()()).toEqual([{ product: product1, quantity: 1 }]);
+    expect(service.allItemsSelected()).toBe(true);
   });
 });

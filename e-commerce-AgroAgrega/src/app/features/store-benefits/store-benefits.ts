@@ -41,13 +41,29 @@ export class StoreBenefitsComponent {
   }
 
   couponTitle(coupon: CouponModel): string {
-    return this.isAgroPlusCoupon(coupon) ? 'Benefício Agro+' : 'Primeira compra';
+    const titles: Record<string, string> = {
+      AGRO20: 'Benefício Agro+',
+      BEMVINDO10: 'Primeira compra',
+      CAMPO15: 'Especial do campo',
+      SAFRA12: 'Temporada da safra',
+      EQUIPA10: 'Renove seus equipamentos',
+      AGUA8: 'Economia na irrigação',
+    };
+
+    return titles[coupon.code] ?? 'Oferta AgroAgrega';
   }
 
   couponDescription(coupon: CouponModel): string {
-    return this.isAgroPlusCoupon(coupon)
-      ? 'Desconto exclusivo para membros Agro+ em produtos participantes.'
-      : 'Uma ajuda para começar sua primeira compra no catálogo AgroAgrega.';
+    const descriptions: Record<string, string> = {
+      AGRO20: 'Desconto exclusivo para membros Agro+ em produtos participantes.',
+      BEMVINDO10: 'Uma ajuda para começar sua primeira compra no catálogo AgroAgrega.',
+      CAMPO15: 'Mais economia para equipar a propriedade e cuidar da produção.',
+      SAFRA12: 'Aproveite a temporada para preparar sua próxima compra.',
+      EQUIPA10: 'Um incentivo para renovar ferramentas, máquinas e acessórios.',
+      AGUA8: 'Economize em soluções que ajudam a cuidar de cada gota no campo.',
+    };
+
+    return descriptions[coupon.code] ?? 'Desconto disponível por tempo limitado.';
   }
 
   applyCoupon(coupon: CouponModel): void {

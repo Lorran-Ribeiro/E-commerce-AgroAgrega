@@ -1,5 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Component, ElementRef, inject, PLATFORM_ID, ViewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import bwipjs from '@bwip-js/browser';
 
 import { Cart } from '../../core/services/cart/cart.service';
 import { PrecoFormatadoPipe } from '../../shared/pipes/preco-formatado-pipe';
@@ -33,11 +35,36 @@ export class CheckoutComponent {
   private orderService = inject(OrderService);
   private auth = inject(Auth);
   private readonly addressService = inject(AddressService);
+  private readonly platformId = inject(PLATFORM_ID);
   readonly PaymentMethod = OrderPaymentMethod;
   readonly router = inject(Router);
 
-  readonly subTotal = this.cart.subtotal;
-  readonly discountValue = this.cart.discountValue;
+  readonly checkoutItems = this.cart.selectedCartItems;
+  readonly subTotal = this.cart.selectedSubtotal;
+  readonly discountValue = this.cart.selectedCouponDiscount;
+  readonly deliveryEstimate = getDeliveryEstimate();
+  readonly boletoDueDate = formatLongDate(addBusinessDays(new Date(), 3));
+
+  pixCopyPasteCode = '';
+  pixExpiresAt = '';
+  boletoBarcodeValue = '';
+  boletoDigitableLine = '';
+  paymentCodeFeedback = '';
+
+  private pixCanvas?: HTMLCanvasElement;
+  private boletoCanvas?: HTMLCanvasElement;
+
+  @ViewChild('pixCanvas')
+  set pixCanvasRef(element: ElementRef<HTMLCanvasElement> | undefined) {
+    this.pixCanvas = element?.nativeElement;
+    this.renderPixQrCode();
+  }
+
+  @ViewChild('boletoCanvas')
+  set boletoCanvasRef(element: ElementRef<HTMLCanvasElement> | undefined) {
+    this.boletoCanvas = element?.nativeElement;
+    this.renderBoletoBarcode();
+  }
 
   savedAddresses: AddressModel[] = [];
   selectedAddressId: string | null = null;
@@ -224,16 +251,16 @@ export class CheckoutComponent {
 
   get paymentDiscountValue(): number {
     return this.checkoutForm.controls.paymentMethod.value === OrderPaymentMethod.Pix
-      ? this.cart.subtotal() * 0.1
+      ? this.cart.selectedPixDiscount()
       : 0;
   }
 
   get discountTotalValue(): number {
-    return this.cart.discountValue() + this.paymentDiscountValue;
+    return this.cart.selectedCouponDiscount() + this.paymentDiscountValue;
   }
 
   get totalValue(): number {
-    return this.cart.total() - this.paymentDiscountValue;
+    return this.cart.selectedTotal() - this.paymentDiscountValue;
   }
 
   selectPaymentMethod(paymentMethod: OrderPaymentMethod): void {
@@ -276,6 +303,106 @@ export class CheckoutComponent {
     }
 
     installments.updateValueAndValidity();
+
+    if (paymentMethod === OrderPaymentMethod.Pix) {
+      this.generatePixCode();
+    } else if (paymentMethod === OrderPaymentMethod.Boleto) {
+      this.generateBoletoCode();
+    }
+  }
+
+  regeneratePaymentCode(): void {
+    const paymentMethod = this.checkoutForm.controls.paymentMethod.value;
+
+    if (paymentMethod === OrderPaymentMethod.Pix) {
+      this.generatePixCode();
+    } else if (paymentMethod === OrderPaymentMethod.Boleto) {
+      this.generateBoletoCode();
+    }
+  }
+
+  async copyPaymentCode(value: string, label: string): Promise<void> {
+    if (!isPlatformBrowser(this.platformId) || !navigator.clipboard) {
+      this.paymentCodeFeedback = 'Selecione e copie o código manualmente.';
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(value);
+      this.paymentCodeFeedback = `${label} copiado.`;
+    } catch {
+      this.paymentCodeFeedback = 'Não foi possível copiar. Selecione o código manualmente.';
+    }
+  }
+
+  private generatePixCode(): void {
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + 30 * 60 * 1000);
+    const reference = `AGPIX${now.getTime().toString(36).toUpperCase()}${randomDigits(4)}`;
+
+    this.pixExpiresAt = new Intl.DateTimeFormat('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(expiresAt);
+    this.pixCopyPasteCode = [
+      'AGROAGREGA',
+      'PIX-DEMONSTRACAO',
+      `REF=${reference}`,
+      `VALOR=${this.totalValue.toFixed(2)}`,
+      `EXPIRA=${expiresAt.toISOString()}`,
+    ].join('|');
+    this.paymentCodeFeedback = '';
+    this.renderPixQrCode();
+  }
+
+  private generateBoletoCode(): void {
+    const digits = randomDigits(47);
+
+    this.boletoBarcodeValue = digits.slice(0, 44);
+    this.boletoDigitableLine = formatDigitableLine(digits);
+    this.paymentCodeFeedback = '';
+    this.renderBoletoBarcode();
+  }
+
+  private renderPixQrCode(): void {
+    if (!isPlatformBrowser(this.platformId) || !this.pixCanvas || !this.pixCopyPasteCode) {
+      return;
+    }
+
+    try {
+      bwipjs.toCanvas(this.pixCanvas, {
+        bcid: 'qrcode',
+        text: this.pixCopyPasteCode,
+        scale: 4,
+        padding: 10,
+        backgroundcolor: 'FFFFFF',
+        barcolor: '123C2C',
+      });
+    } catch {
+      this.paymentCodeFeedback = 'Não foi possível desenhar o QR Code neste navegador.';
+    }
+  }
+
+  private renderBoletoBarcode(): void {
+    if (!isPlatformBrowser(this.platformId) || !this.boletoCanvas || !this.boletoBarcodeValue) {
+      return;
+    }
+
+    try {
+      bwipjs.toCanvas(this.boletoCanvas, {
+        bcid: 'code128',
+        text: this.boletoBarcodeValue,
+        scale: 2,
+        height: 16,
+        padding: 8,
+        backgroundcolor: 'FFFFFF',
+        barcolor: '10271F',
+      });
+    } catch {
+      this.paymentCodeFeedback = 'Não foi possível desenhar o código de barras neste navegador.';
+    }
   }
 
   getErrorMessage(control: AbstractControl): string {
@@ -318,9 +445,9 @@ export class CheckoutComponent {
 
     if (paymentMethod === OrderPaymentMethod.Pix || paymentMethod === OrderPaymentMethod.Boleto) {
       this.orderService.createOrder(
-        this.cart.getCartItems()(),
+        this.cart.selectedCartItems(),
         customerName,
-        this.cart.subtotal(),
+        this.cart.selectedSubtotal(),
         this.discountTotalValue,
         0,
         paymentMethod,
@@ -329,9 +456,9 @@ export class CheckoutComponent {
       );
     } else {
       this.orderService.createOrder(
-        this.cart.getCartItems()(),
+        this.cart.selectedCartItems(),
         customerName,
-        this.cart.subtotal(),
+        this.cart.selectedSubtotal(),
         this.discountTotalValue,
         0,
         paymentMethod,
@@ -340,7 +467,7 @@ export class CheckoutComponent {
     }
 
     this.cart.removeCoupon();
-    this.cart.cleanCartItem();
+    this.cart.removeSelectedItems();
 
     this.router.navigate(['/orders']);
   }
@@ -527,4 +654,61 @@ function validInstallments(control: AbstractControl): ValidationErrors | null {
   }
 
   return null;
+}
+
+export function addBusinessDays(startDate: Date, businessDays: number): Date {
+  const result = new Date(startDate);
+  let remainingDays = Math.max(0, Math.trunc(businessDays));
+
+  while (remainingDays > 0) {
+    result.setDate(result.getDate() + 1);
+    const dayOfWeek = result.getDay();
+
+    if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+      remainingDays -= 1;
+    }
+  }
+
+  return result;
+}
+
+export function formatLongDate(date: Date): string {
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  }).format(date);
+}
+
+export function getDeliveryEstimate(startDate = new Date()): string {
+  const firstDate = addBusinessDays(startDate, 5);
+  const lastDate = addBusinessDays(startDate, 8);
+
+  return `Receba entre ${formatLongDate(firstDate)} e ${formatLongDate(lastDate)}`;
+}
+
+export function formatDigitableLine(digits: string): string {
+  const normalizedDigits = digits.replace(/\D/g, '').padEnd(47, '0').slice(0, 47);
+
+  return [
+    `${normalizedDigits.slice(0, 5)}.${normalizedDigits.slice(5, 10)}`,
+    `${normalizedDigits.slice(10, 15)}.${normalizedDigits.slice(15, 21)}`,
+    `${normalizedDigits.slice(21, 26)}.${normalizedDigits.slice(26, 32)}`,
+    normalizedDigits.slice(32, 33),
+    normalizedDigits.slice(33, 47),
+  ].join(' ');
+}
+
+function randomDigits(length: number): string {
+  const values = new Uint8Array(length);
+
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    crypto.getRandomValues(values);
+  } else {
+    for (let index = 0; index < length; index += 1) {
+      values[index] = Math.floor(Math.random() * 256);
+    }
+  }
+
+  return Array.from(values, (value) => String(value % 10)).join('');
 }

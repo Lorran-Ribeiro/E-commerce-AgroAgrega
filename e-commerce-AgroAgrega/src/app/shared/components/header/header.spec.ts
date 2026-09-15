@@ -1,6 +1,8 @@
+import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
+import { Auth } from '@core/services/auth/auth.service';
 import { Header } from './header';
 
 describe('Header', () => {
@@ -10,7 +12,20 @@ describe('Header', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Header],
-      providers: [provideRouter([])],
+      providers: [
+        provideRouter([]),
+        {
+          provide: Auth,
+          useValue: {
+            isLoggedIn: () => true,
+            getName: () => 'Gustavo Leite',
+            getEmail: () => 'gustavo@example.com',
+            getId: () => 'user-1',
+            currentUserId: signal<string | null>('user-1'),
+            logout: () => undefined,
+          },
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(Header);
@@ -33,5 +48,30 @@ describe('Header', () => {
     expect(host.textContent).toContain('Cupons');
     expect(host.textContent).toContain('Agro+');
     expect(host.textContent).toContain('Ofertas');
+  });
+
+  it('should open the account menu with identity and shortcuts', () => {
+    component.toggleAccountMenu(new MouseEvent('click'));
+    fixture.detectChanges();
+
+    const host = fixture.nativeElement as HTMLElement;
+    expect(host.querySelector('.account-dropdown')).not.toBeNull();
+    expect(host.textContent).toContain('gustavo@example.com');
+    expect(host.textContent).toContain('Compras e histórico');
+    expect(host.textContent).toContain('Benefícios Agro+');
+  });
+
+  it('should show Compra before the cart without the old orders icon', () => {
+    fixture.detectChanges();
+    const host = fixture.nativeElement as HTMLElement;
+    const actions = Array.from(host.querySelectorAll('.acoes-header > a'));
+
+    expect(host.querySelector('.icone-pedidos')).toBeNull();
+    expect(host.querySelector('.compra-link')?.textContent?.trim()).toBe('Compra');
+    expect(actions[0]?.classList.contains('compra-link')).toBe(true);
+    expect(actions[1]?.classList.contains('icone-carrinho')).toBe(true);
+    expect(host.querySelector<HTMLImageElement>('.icone-carrinho img')?.src).toContain(
+      '/assets/fonts/icones/shop.svg',
+    );
   });
 });
