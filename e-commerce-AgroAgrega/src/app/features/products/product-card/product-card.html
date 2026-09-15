@@ -1,7 +1,9 @@
 <article class="product-card">
   <div class="product-card-top">
     <span class="product-card-tag">
-      @if (getDiscountPercent(product()) > 0) {
+      @if (product().flashOffer) {
+        Relâmpago −{{ getDiscountPercent(product()) }}%
+      } @else if (getDiscountPercent(product()) > 0) {
         Oferta −{{ getDiscountPercent(product()) }}%
       } @else {
         {{ (product().weeklySales ?? 0) >= 80 ? 'Mais vendido' : 'Pronta entrega' }}

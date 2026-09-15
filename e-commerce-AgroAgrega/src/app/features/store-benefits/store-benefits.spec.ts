@@ -76,4 +76,38 @@ describe('StoreBenefitsComponent', () => {
     expect(navigateSpy).toHaveBeenCalledWith(['/agro-plus']);
     expect(applyCoupon).not.toHaveBeenCalled();
   });
+
+  it('should offer an expanded set of Agro+ benefits', () => {
+    expect(component.agroPlusBenefits).toHaveLength(10);
+    expect(component.agroPlusBenefits.map((benefit) => benefit.id)).toEqual(
+      expect.arrayContaining(['cashback', 'shipping', 'points', 'support', 'price-protection']),
+    );
+  });
+
+  it('should update the highlighted benefit when it is selected', () => {
+    component.selectBenefit('shipping');
+
+    expect(component.selectedBenefitId()).toBe('shipping');
+    expect(component.selectedBenefit.title).toContain('Frete grátis');
+  });
+
+  it('should filter benefits and keep guided navigation inside the selected category', () => {
+    component.selectBenefitCategory('exclusive');
+
+    expect(component.visibleBenefits.every((benefit) => benefit.category === 'exclusive')).toBe(
+      true,
+    );
+    expect(component.selectedBenefit.category).toBe('exclusive');
+
+    component.showAdjacentBenefit(1);
+    expect(component.selectedBenefit.category).toBe('exclusive');
+  });
+
+  it('should calculate the estimated advantage after the monthly subscription price', () => {
+    component.monthlyPurchaseValue.set(500);
+
+    expect(component.subscriptionPrice).toBe(20.9);
+    expect(component.estimatedMonthlyAdvantage).toBeCloseTo(119);
+    expect(component.estimatedYearlyAdvantage).toBeCloseTo(1428);
+  });
 });

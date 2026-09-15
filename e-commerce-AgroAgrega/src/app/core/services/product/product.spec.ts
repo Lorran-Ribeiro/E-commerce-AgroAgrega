@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { render, screen } from '@testing-library/angular';
-import { ProductService } from './product.service';
+import { productsItems } from '../../data/products';
+import { applyDailyFlashOffers, ProductService } from './product.service';
 
 describe('ProductService', () => {
   let service: ProductService;
@@ -46,6 +47,33 @@ describe('ProductService', () => {
         products.filter((product) => product.category === category).length,
       ).toBeGreaterThanOrEqual(10);
     }
+  });
+
+  it('deve criar seis ofertas relâmpago determinísticas para cada dia', () => {
+    const date = new Date(2026, 8, 15, 10);
+    const firstResult = applyDailyFlashOffers(productsItems, date);
+    const secondResult = applyDailyFlashOffers(productsItems, date);
+    const firstOffers = firstResult.filter((product) => product.flashOffer);
+    const secondOffers = secondResult.filter((product) => product.flashOffer);
+
+    expect(firstOffers).toHaveLength(6);
+    expect(firstOffers.map((product) => product.id)).toEqual(
+      secondOffers.map((product) => product.id),
+    );
+    expect(firstOffers.every((product) => product.originalPrice! > product.price)).toBe(true);
+    expect(firstOffers.every((product) => product.flashOfferDate === '2026-09-15')).toBe(true);
+  });
+
+  it('deve trocar todos os produtos relâmpago no dia seguinte', () => {
+    const todayOffers = applyDailyFlashOffers(productsItems, new Date(2026, 8, 15))
+      .filter((product) => product.flashOffer)
+      .map((product) => product.id);
+    const tomorrowOffers = applyDailyFlashOffers(productsItems, new Date(2026, 8, 16))
+      .filter((product) => product.flashOffer)
+      .map((product) => product.id);
+
+    expect(tomorrowOffers).toHaveLength(6);
+    expect(tomorrowOffers.some((productId) => todayOffers.includes(productId))).toBe(false);
   });
 
   it('deve adicinar uma avaliacao e recalcular a classificacao do produto', () => {

@@ -1,9 +1,37 @@
 <main class="product-page" id="catalog-content">
-  <header class="catalog-header">
-    <span class="catalog-eyebrow">AgroAgrega</span>
-    <h1>Encontre o que sua produção precisa</h1>
-    <p class="catalog-intro">Soluções para agricultura, pecuária e o dia a dia no campo.</p>
-  </header>
+  @if (offersOnly()) {
+    <header class="flash-offers-hero">
+      <div class="flash-offers-hero__copy">
+        <span class="flash-offers-kicker"><b aria-hidden="true">⚡</b> Seleção diária</span>
+        <h1>Ofertas relâmpago</h1>
+        <p>
+          Produtos diferentes, descontos novos e só até o fim do dia. Amanhã a vitrine muda
+          automaticamente.
+        </p>
+        <div class="flash-offers-facts" aria-label="Resumo das ofertas de hoje">
+          <span
+            ><strong>{{ flashOfferProducts().length }}</strong> produtos hoje</span
+          >
+          <span
+            ><strong>até {{ highestFlashDiscount() }}%</strong> de desconto</span
+          >
+          <span><strong>frete grátis</strong> em itens elegíveis</span>
+        </div>
+      </div>
+
+      <div class="flash-offers-clock" aria-live="off">
+        <span>As ofertas mudam em</span>
+        <strong>{{ flashOfferCountdown() }}</strong>
+        <small>{{ flashOfferDateLabel() }}</small>
+      </div>
+    </header>
+  } @else {
+    <header class="catalog-header">
+      <span class="catalog-eyebrow">AgroAgrega</span>
+      <h1>Encontre o que sua produção precisa</h1>
+      <p class="catalog-intro">Soluções para agricultura, pecuária e o dia a dia no campo.</p>
+    </header>
+  }
 
   <div class="catalog-layout">
     <div class="catalog-main-content">
@@ -154,6 +182,19 @@
         tabindex="-1"
         aria-label="Resultados do catálogo"
       >
+        @if (offersOnly()) {
+          <div class="daily-offer-notice">
+            <span aria-hidden="true">↻</span>
+            <div>
+              <strong>Vitrine renovada automaticamente</strong>
+              <p>
+                A seleção usa a data atual: à meia-noite, estes produtos saem e uma nova rodada de
+                ofertas entra no lugar.
+              </p>
+            </div>
+          </div>
+        }
+
         @if (showFeaturedProducts()) {
           <section class="featured-products" aria-labelledby="featured-products-title">
             <div class="section-heading">
@@ -163,7 +204,11 @@
               </div>
               <div class="featured-heading-actions">
                 <small>Seleção com base nas vendas recentes</small>
-                <div class="carousel-controls" role="group" aria-label="Navegar pelos mais procurados">
+                <div
+                  class="carousel-controls"
+                  role="group"
+                  aria-label="Navegar pelos mais procurados"
+                >
                   <button
                     type="button"
                     aria-label="Ver produtos anteriores"
@@ -189,7 +234,10 @@
               aria-label="Carrossel dos produtos mais procurados da semana"
             >
               @for (product of featuredProducts(); track product.id; let index = $index) {
-                <article class="featured-card" [attr.aria-label]="'Produto ' + (index + 1) + ' de ' + featuredProducts().length">
+                <article
+                  class="featured-card"
+                  [attr.aria-label]="'Produto ' + (index + 1) + ' de ' + featuredProducts().length"
+                >
                   <a class="featured-image" [routerLink]="['/products', product.id]">
                     <img
                       [src]="product.images[0]"
@@ -254,7 +302,11 @@
             <div class="toolbar-actions">
               <label class="sort-label">
                 <span>Ordenar por</span>
-                <select class="sort-select" [value]="sortOrder()" (change)="updateSortOrder($event)">
+                <select
+                  class="sort-select"
+                  [value]="sortOrder()"
+                  (change)="updateSortOrder($event)"
+                >
                   <option value="mais_vendidos">Mais vendidos</option>
                   <option value="melhor_avaliados">Melhor avaliados</option>
                   <option value="menor_preco">Menor preço</option>

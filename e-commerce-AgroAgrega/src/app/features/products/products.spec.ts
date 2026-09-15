@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
-import { ProductsComponent } from './products';
+import { formatFlashOfferCountdown, ProductsComponent } from './products';
 
 describe('ProductsComponent', () => {
   let component: ProductsComponent;
@@ -124,6 +124,10 @@ describe('ProductsComponent', () => {
     component.clearComparison();
     expect(component.comparedProducts()).toEqual([]);
     expect(component.comparisonOpen()).toBe(false);
+  });
+
+  it('deve exibir a contagem regressiva até a troca diária', () => {
+    expect(formatFlashOfferCountdown(new Date(2026, 8, 15, 21, 30, 15))).toBe('02:29:45');
   });
 
   it('should render the floating comparison tray while products are selected', () => {

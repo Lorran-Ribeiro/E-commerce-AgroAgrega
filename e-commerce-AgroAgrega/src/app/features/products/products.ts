@@ -1,4 +1,13 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  PLATFORM_ID,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 
@@ -40,6 +49,9 @@ export class ProductsComponent {
   private readonly router = inject(Router);
   private readonly productService = inject(ProductService);
   private readonly cart = inject(Cart);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly destroyRef = inject(DestroyRef);
+  private countdownTimer?: ReturnType<typeof setInterval>;
 
   private readonly addedProductIds = signal<Set<string>>(new Set());
   private readonly queryParams = toSignal(this.route.queryParamMap, {
@@ -66,6 +78,21 @@ export class ProductsComponent {
 
   readonly searchTerm = computed(() => (this.queryParams().get('search') ?? '').trim());
   readonly offersOnly = computed(() => this.queryParams().get('offers') === 'true');
+  readonly currentTime = signal(new Date());
+  readonly flashOfferProducts = computed(() =>
+    this.products().filter((product) => product.flashOffer),
+  );
+  readonly flashOfferDateLabel = computed(() =>
+    new Intl.DateTimeFormat('pt-BR', {
+      weekday: 'long',
+      day: '2-digit',
+      month: 'long',
+    }).format(this.currentTime()),
+  );
+  readonly flashOfferCountdown = computed(() => formatFlashOfferCountdown(this.currentTime()));
+  readonly highestFlashDiscount = computed(() =>
+    Math.max(...this.flashOfferProducts().map((product) => product.flashOfferDiscount ?? 0), 0),
+  );
   readonly viewMode = signal<'grid' | 'list'>('grid');
   readonly filtersOpen = signal(false);
   readonly selectedBrands = signal<BrandOption[]>([]);
@@ -118,7 +145,7 @@ export class ProductsComponent {
     }
 
     if (this.offersOnly()) {
-      chips.push({ key: 'offers', label: 'Ofertas', type: 'offers' });
+      chips.push({ key: 'offers', label: 'Ofertas relâmpago de hoje', type: 'offers' });
     }
 
     for (const brand of this.selectedBrands()) {
@@ -181,9 +208,7 @@ export class ProductsComponent {
     }
 
     if (this.offersOnly()) {
-      filtered = filtered.filter(
-        (product) => product.originalPrice !== undefined && product.originalPrice > product.price,
-      );
+      filtered = filtered.filter((product) => product.flashOffer);
     }
 
     filtered = filtered.filter((product) => product.price <= maxPrice);
@@ -221,6 +246,11 @@ export class ProductsComponent {
 
   readonly resultsLabel = computed(() => {
     const count = this.filteredProducts().length;
+
+    if (this.offersOnly()) {
+      return `${count} ${count === 1 ? 'oferta relâmpago ativa' : 'ofertas relâmpago ativas'}`;
+    }
+
     return `${count} ${count === 1 ? 'produto encontrado' : 'produtos encontrados'}`;
   });
 
@@ -272,6 +302,11 @@ export class ProductsComponent {
       this.queryParams();
       this.resetPagination();
     });
+
+    if (isPlatformBrowser(this.platformId)) {
+      this.countdownTimer = setInterval(() => this.currentTime.set(new Date()), 1000);
+      this.destroyRef.onDestroy(() => clearInterval(this.countdownTimer));
+    }
   }
 
   selectCategory(category: CategoryFilter): void {
@@ -315,9 +350,7 @@ export class ProductsComponent {
         this.clearCatalogSearch();
         return;
       case 'brand':
-        this.selectedBrands.update((brands) =>
-          brands.filter((brand) => brand !== filter.value),
-        );
+        this.selectedBrands.update((brands) => brands.filter((brand) => brand !== filter.value));
         break;
       case 'rating':
         this.minRating.set(0);
@@ -508,4 +541,14 @@ export class ProductsComponent {
       maximumFractionDigits: 2,
     }).format(value);
   }
+}
+
+export function formatFlashOfferCountdown(date: Date): string {
+  const nextDay = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+  const remainingSeconds = Math.max(0, Math.floor((nextDay.getTime() - date.getTime()) / 1000));
+  const hours = Math.floor(remainingSeconds / 3600);
+  const minutes = Math.floor((remainingSeconds % 3600) / 60);
+  const seconds = remainingSeconds % 60;
+
+  return [hours, minutes, seconds].map((value) => String(value).padStart(2, '0')).join(':');
 }
