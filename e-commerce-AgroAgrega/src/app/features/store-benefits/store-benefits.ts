@@ -25,7 +25,7 @@ interface AgroPlusBenefit {
   selector: 'app-store-benefits',
   imports: [RouterLink],
   templateUrl: './store-benefits.html',
-  styleUrl: './store-benefits.css',
+  styleUrls: ['./store-benefits-visuals.css', './store-benefits.css'],
 })
 export class StoreBenefitsComponent {
   private readonly route = inject(ActivatedRoute);

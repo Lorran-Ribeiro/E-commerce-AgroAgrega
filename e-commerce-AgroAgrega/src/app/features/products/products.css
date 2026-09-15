@@ -631,37 +631,108 @@
   color: #e49b19;
 }
 
-.new-price {
+.featured-offer {
+  width: 100%;
   margin: auto 0 0;
   padding-top: 8px;
+}
+
+.featured-discount,
+.featured-main-price,
+.featured-pix,
+.featured-installment,
+.featured-delivery {
+  margin: 0;
+}
+
+.featured-discount {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.featured-discount span {
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: #0ca34a;
+  color: #ffffff;
+  font-size: 0.61rem;
+  font-weight: 850;
+}
+
+.featured-discount s {
+  color: var(--catalog-muted);
+  font-size: 0.65rem;
+}
+
+.featured-main-price {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 7px;
+  margin-top: 5px;
+}
+
+.featured-main-price strong {
   color: var(--catalog-green-dark);
   font-size: 1.24rem;
   font-weight: 850;
   letter-spacing: -0.04em;
 }
 
-.add-btn-small {
-  min-height: 42px;
-  padding: 0 13px;
-  border: 0;
-  border-radius: 10px;
-  background: var(--catalog-green);
-  color: #ffffff;
-  font: inherit;
-  font-size: 0.75rem;
+.featured-main-price small {
+  color: var(--catalog-muted);
+  font-size: 0.6rem;
+}
+
+.featured-pix {
+  margin-top: 4px;
+  color: #079447;
+  font-size: 0.7rem;
   font-weight: 750;
 }
 
-.add-btn-small.product-added {
-  background: #9bd52b;
-  color: var(--catalog-green-dark);
+.featured-installment {
+  margin-top: 3px;
+  color: #526159;
+  font-size: 0.64rem;
+  line-height: 1.35;
+}
+
+.featured-installment strong {
+  color: #079447;
+}
+
+.featured-delivery {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-top: 6px;
+  color: #079447;
+  font-size: 0.65rem;
+  font-weight: 800;
 }
 
 .featured-actions {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
+  width: 100%;
   gap: 7px;
   margin-top: 9px;
+}
+
+.details-link-small {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: var(--catalog-green);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-decoration: none;
 }
 
 .compare-btn-small {
@@ -1226,14 +1297,8 @@ a:focus-visible {
     display: none;
   }
 
-  .new-price {
+  .featured-main-price strong {
     font-size: 1.08rem;
-  }
-
-  .add-btn-small {
-    width: 100%;
-    padding-inline: 8px;
-    font-size: 0.7rem;
   }
 
   .featured-actions {

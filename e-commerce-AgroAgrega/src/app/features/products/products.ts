@@ -12,9 +12,15 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import { BrandOption, ProductCategory, ProductModel } from '@models/product';
-import { Cart } from '@core/services/cart/cart.service';
 import { ProductService } from '../../core/services/product/product.service';
 import { PrecoFormatadoPipe } from '../../shared/pipes/preco-formatado-pipe';
+import {
+  calculateDiscountPercent,
+  calculateInstallmentPrice,
+  calculatePixPrice,
+  getFreeDeliveryLabel,
+  getWeeklySalesLabel,
+} from '../../shared/utils/product-card-display';
 import { ProductCardComponent } from './product-card/product-card';
 import { ProductComparisonComponent } from './product-comparison/product-comparison';
 
@@ -48,17 +54,20 @@ export class ProductsComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly productService = inject(ProductService);
-  private readonly cart = inject(Cart);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly destroyRef = inject(DestroyRef);
   private countdownTimer?: ReturnType<typeof setInterval>;
 
-  private readonly addedProductIds = signal<Set<string>>(new Set());
   private readonly queryParams = toSignal(this.route.queryParamMap, {
     initialValue: this.route.snapshot.queryParamMap,
   });
 
   readonly products = this.productService.getProducts();
+  readonly freeDeliveryLabel = getFreeDeliveryLabel();
+  readonly calculateDiscountPercent = calculateDiscountPercent;
+  readonly calculateInstallmentPrice = calculateInstallmentPrice;
+  readonly calculatePixPrice = calculatePixPrice;
+  readonly getWeeklySalesLabel = getWeeklySalesLabel;
   readonly productCategories = this.productService.getProductCategories();
   readonly categoryFilters: CategoryFilter[] = ['Todos', ...this.productCategories];
   readonly categoryProductCounts = computed(() =>
@@ -368,23 +377,6 @@ export class ProductsComponent {
     }
 
     this.resetPagination();
-  }
-
-  isProductAdded(productId: string): boolean {
-    return this.addedProductIds().has(productId);
-  }
-
-  addProductToCart(product: ProductModel): void {
-    this.cart.addCartItem(product);
-    this.addedProductIds.update((ids) => new Set([...ids, product.id]));
-
-    setTimeout(() => {
-      this.addedProductIds.update((ids) => {
-        const newIds = new Set(ids);
-        newIds.delete(product.id);
-        return newIds;
-      });
-    }, 2000);
   }
 
   isProductCompared(productId: string): boolean {

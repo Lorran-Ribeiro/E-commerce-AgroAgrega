@@ -261,7 +261,35 @@
                       <span aria-hidden="true">★</span>
                       {{ product.rating.toFixed(1) }} de 5
                     </p>
-                    <p class="new-price">{{ product.price | precoFormatado }}</p>
+                    <div class="featured-offer">
+                      @if (product.originalPrice; as originalPrice) {
+                        <p class="featured-discount">
+                          <span>
+                            {{ calculateDiscountPercent(product.price, originalPrice) }}% OFF
+                          </span>
+                          <s>{{ originalPrice | precoFormatado }}</s>
+                        </p>
+                      }
+                      <p class="featured-main-price">
+                        <strong>{{ product.price | precoFormatado }}</strong>
+                        <small>{{ getWeeklySalesLabel(product.weeklySales) }}</small>
+                      </p>
+                      <p class="featured-pix">
+                        {{ calculatePixPrice(product.price) | precoFormatado }}
+                        <strong>no Pix</strong>
+                      </p>
+                      <p class="featured-installment">
+                        ou 10x de
+                        <strong>
+                          {{ calculateInstallmentPrice(product.price) | precoFormatado }}
+                        </strong>
+                        sem juros
+                      </p>
+                      <p class="featured-delivery">
+                        <span aria-hidden="true">⚡</span>
+                        {{ freeDeliveryLabel }}
+                      </p>
+                    </div>
                     <div class="featured-actions">
                       <button
                         class="compare-btn-small"
@@ -272,18 +300,9 @@
                       >
                         {{ isProductCompared(product.id) ? 'Selecionado' : 'Comparar' }}
                       </button>
-                      <button
-                        class="add-btn-small"
-                        type="button"
-                        [class.product-added]="isProductAdded(product.id)"
-                        (click)="addProductToCart(product)"
-                      >
-                        @if (isProductAdded(product.id)) {
-                          Adicionado ✓
-                        } @else {
-                          Adicionar ao carrinho
-                        }
-                      </button>
+                      <a class="details-link-small" [routerLink]="['/products', product.id]">
+                        Ver detalhes
+                      </a>
                     </div>
                   </div>
                 </article>
@@ -369,7 +388,6 @@
             <app-product-card
               [product]="product"
               [compareSelected]="isProductCompared(product.id)"
-              (addToCart)="addProductToCart($event)"
               (toggleCompare)="toggleProductComparison($event)"
             ></app-product-card>
           } @empty {

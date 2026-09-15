@@ -25,6 +25,7 @@ describe('ProductCardComponent', () => {
       category: 'Insumos',
       images: [],
       rating: 5,
+      weeklySales: 42,
     };
     fixture.componentRef.setInput('product', product);
     await fixture.whenStable();
@@ -66,6 +67,19 @@ describe('ProductCardComponent', () => {
     const host = fixture.nativeElement as HTMLElement;
 
     expect(host.querySelector('.product-card-tag')?.textContent).toContain('Oferta −20%');
-    expect(host.querySelector('.product-card-amount s')?.textContent).toContain('R$ 100.00');
+    expect(host.querySelector('.product-card-discount-line s')?.textContent).toContain('R$ 100.00');
+  });
+
+  it('should replace the cart button with detailed purchase information', () => {
+    fixture.detectChanges();
+    const host = fixture.nativeElement as HTMLElement;
+
+    expect(host.querySelector('.product-card-button')).toBeNull();
+    expect(host.querySelector('.product-card-pix')?.textContent).toContain('R$ 9.00');
+    expect(host.querySelector('.product-card-installment')?.textContent).toContain('R$ 1.00');
+    expect(host.querySelector('.product-card-main-price small')?.textContent).toContain(
+      '42 vendidos nesta semana',
+    );
+    expect(host.querySelector('.product-card-delivery')?.textContent).toContain('Chega grátis');
   });
 });

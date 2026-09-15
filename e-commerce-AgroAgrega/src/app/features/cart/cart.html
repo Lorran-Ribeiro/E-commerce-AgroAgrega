@@ -256,7 +256,7 @@
 
       <div class="recommendations__grid">
         @for (product of recommendations(); track product.id) {
-          <app-product-card [product]="product" (addToCart)="addProduct($event)" />
+          <app-product-card [product]="product" />
         }
       </div>
     </section>
