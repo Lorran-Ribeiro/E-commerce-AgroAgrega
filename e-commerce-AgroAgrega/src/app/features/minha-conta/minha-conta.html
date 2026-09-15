@@ -1,4 +1,9 @@
 <div class="minha-conta">
+  <nav class="breadcrumb" aria-label="Navegação estrutural">
+    <a routerLink="/">Home</a>
+    <span aria-hidden="true">›</span>
+    <strong>Minha Conta</strong>
+  </nav>
   <div class="minha-conta__header">
     <div>
       <p class="eyebrow">Perfil</p>
@@ -6,9 +11,74 @@
     </div>
   </div>
 
-  <section class="card card--dados">
+  <section class="profile-overview" aria-labelledby="profile-overview-title">
+    <div
+      class="profile-avatar profile-avatar--current"
+      [attr.data-avatar]="avatar.selectedAvatar().id"
+      aria-hidden="true"
+    >
+      {{ avatar.selectedAvatar().glyph }}
+    </div>
+    <div class="profile-overview__identity">
+      <p class="profile-overview__label">Conta conectada</p>
+      <h2 id="profile-overview-title">{{ userName }}</h2>
+      <span>{{ userEmail }}</span>
+    </div>
+    <div class="profile-overview__actions">
+      <a class="membership-pill" routerLink="/agro-plus">Agro+ <span>Ver benefícios</span></a>
+      <button
+        type="button"
+        class="btn btn--secondary"
+        [attr.aria-expanded]="avatarPickerOpen"
+        aria-controls="avatar-picker"
+        (click)="toggleAvatarPicker()"
+      >
+        Escolher avatar
+      </button>
+    </div>
+
+    @if (avatarPickerOpen) {
+      <div class="avatar-picker" id="avatar-picker">
+        <div>
+          <strong>Escolha como você quer aparecer</strong>
+          <small
+            >{{ avatar.options.length }} opções disponíveis. A seleção fica salva neste
+            dispositivo.</small
+          >
+        </div>
+        <div class="avatar-options" role="list" aria-label="Avatares disponíveis">
+          @for (option of avatar.options; track option.id) {
+            <button
+              type="button"
+              role="listitem"
+              [class.avatar-option--selected]="avatar.isSelected(option.id)"
+              [attr.aria-pressed]="avatar.isSelected(option.id)"
+              (click)="selectAvatar(option.id)"
+            >
+              <span class="profile-avatar" [attr.data-avatar]="option.id" aria-hidden="true">
+                {{ option.glyph }}
+              </span>
+              <span>{{ option.label }}</span>
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </section>
+
+  <section class="card card--dados" id="account-profile">
     <div class="card__title-row">
-      <h2>👤 Meus dados</h2>
+      <h2 class="titulo-com-icone">
+        <img
+          src="/assets/images/icon-my-account.webp"
+          loading="lazy"
+          decoding="async"
+          alt=""
+          class="icone-titulo"
+        />
+        Meus dados
+      </h2>
+
       @if (!editingProfile) {
         <button type="button" class="btn btn--secondary" (click)="editProfile()">
           Editar dados
@@ -33,6 +103,7 @@
         <label>
           <span>Nome</span>
           <input type="text" formControlName="name" />
+
           @if (profileForm.get('name')?.touched && profileForm.get('name')?.invalid) {
             <small class="errorMessage">
               {{ getErrorMessage(profileForm.get('name')!) }}
@@ -43,6 +114,7 @@
         <label>
           <span>E-mail</span>
           <input type="email" formControlName="email" />
+
           @if (profileForm.get('email')?.touched && profileForm.get('email')?.invalid) {
             <small class="errorMessage">
               {{ getErrorMessage(profileForm.get('email')!) }}
@@ -52,15 +124,25 @@
 
         <div class="form-actions">
           <button type="submit" class="btn btn--primary">Salvar</button>
+
           <button type="button" class="btn btn--ghost" (click)="cancelEdit()">Cancelar</button>
         </div>
       </form>
     }
   </section>
 
-  <section class="card">
+  <section class="card" id="account-addresses">
     <div class="card__title-row">
-      <h2>📍 Meus endereços</h2>
+      <h2 class="titulo-com-icone">
+        <img
+          src="/assets/images/icon-my-loc.webp"
+          loading="lazy"
+          decoding="async"
+          alt=""
+          class="icone-titulo"
+        />
+        Meus endereços
+      </h2>
       @if (!isAddressFormOpen) {
         <button type="button" class="btn btn--secondary" (click)="startAddAddress()">
           + Adicionar endereço
@@ -89,11 +171,6 @@
               placeholder="00000-000"
               (blur)="buscarEnderecoPorCep()"
             />
-            @if (addressForm.get('cep')?.touched && addressForm.get('cep')?.invalid) {
-              <small class="errorMessage">
-                {{ getErrorMessage(addressForm.get('cep')!) }}
-              </small>
-            }
           </label>
 
           <button
@@ -104,6 +181,11 @@
             Buscar CEP
           </button>
         </div>
+        @if (addressForm.get('cep')?.touched && addressForm.get('cep')?.invalid) {
+          <small class="errorMessage">
+            {{ getErrorMessage(addressForm.get('cep')!) }}
+          </small>
+        }
 
         <label>
           <span>Rua</span>
@@ -129,7 +211,9 @@
           <label>
             <span>Bairro</span>
             <input type="text" formControlName="neighborhood" />
-            @if (addressForm.get('neighborhood')?.touched && addressForm.get('neighborhood')?.invalid) {
+            @if (
+              addressForm.get('neighborhood')?.touched && addressForm.get('neighborhood')?.invalid
+            ) {
               <small class="errorMessage">
                 {{ getErrorMessage(addressForm.get('neighborhood')!) }}
               </small>
@@ -209,8 +293,17 @@
     }
   </section>
 
-  <section class="card card--account">
-    <h2>⚙️ Conta</h2>
+  <section class="card card--account" id="account-security">
+    <h2 class="titulo-com-icone">
+      <img
+        src="/assets/images/icon-my-config.webp"
+        loading="lazy"
+        decoding="async"
+        alt=""
+        class="icone-titulo"
+      />
+      Conta
+    </h2>
 
     <div class="account-actions">
       <button type="button" class="btn btn--secondary" (click)="logout()">Logout</button>

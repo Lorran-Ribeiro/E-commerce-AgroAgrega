@@ -6,7 +6,6 @@ import { UserModel } from '@models/user';
   providedIn: 'root',
 })
 export class StorageService {
-  //Seta os usúarios se baseando no modelo User.
   setUser(data: UserModel): ServiceResponse {
     try {
       const dtLocal = localStorage.getItem('db');
@@ -29,7 +28,6 @@ export class StorageService {
     }
   }
 
-  //Busca usuário pelo email | poderia ser pelo ID
   getUser(email: string): UserModel | null {
     try {
       const data = localStorage.getItem('db');
@@ -43,15 +41,18 @@ export class StorageService {
     }
   }
 
-  // Retorna todos os usuários
   getAllUsers(): UserModel[] | string {
-    const data = localStorage.getItem('db');
-    if (!data) return [];
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') return [];
 
-    return data;
+    try {
+      const data = localStorage.getItem('db');
+      if (!data) return [];
+      return data;
+    } catch {
+      return [];
+    }
   }
 
-  // Atualiza usuário
   updatePasswordUser(email: string, newPassword: string): ServiceResponse {
     try {
       const data = localStorage.getItem('db');
@@ -115,13 +116,17 @@ export class StorageService {
   }
 
   removeUser(id: string): boolean {
-    const data = localStorage.getItem('db');
-
-    if (!data || !id) {
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
       return false;
     }
 
     try {
+      const data = localStorage.getItem('db');
+
+      if (!data || !id) {
+        return false;
+      }
+
       const users: UserModel[] = JSON.parse(data);
       const originalLength = users.length;
       const remainingUsers = users.filter((user) => user.id !== id);
@@ -139,6 +144,11 @@ export class StorageService {
   }
 
   clear(): void {
-    localStorage.clear();
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+      return;
+    }
+    try {
+      localStorage.clear();
+    } catch {}
   }
 }

@@ -1,7 +1,11 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
+
 import { RouterOutlet, ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+
 import { filter } from 'rxjs';
+
 import { Header } from './shared/components/header/header';
+
 import { Footer } from './shared/components/footer/footer';
 
 @Component({
@@ -10,31 +14,40 @@ import { Footer } from './shared/components/footer/footer';
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
-export class App {
+export class App implements OnInit {
   protected readonly title = signal('e-commerce-AgroAgrega');
 
-  mostrarHeader = signal(false);
-  mostrarFooter = signal(false);
+  mostrarHeader = signal(true);
+  mostrarFooter = signal(true);
 
   constructor(
     private router: Router,
     private activatedRoute: ActivatedRoute,
   ) {
-    this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
-      this.atualizarLayout();
-    });
+    this.atualizarLayout();
+
+    this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe(() => {
+        this.atualizarLayout();
+      });
+  }
+
+  ngOnInit(): void {
+    this.atualizarLayout();
   }
 
   private atualizarLayout(): void {
     let rotaAtual = this.activatedRoute;
+
     while (rotaAtual.firstChild) {
       rotaAtual = rotaAtual.firstChild;
     }
 
-    const dadosDaRota = rotaAtual.snapshot.data;
+    const dadosDaRota = rotaAtual.snapshot?.data ?? {};
 
-    const esconderHeader = dadosDaRota['hideHeader'];
-    const esconderFooter = dadosDaRota['hideFooter'];
+    const esconderHeader = Boolean(dadosDaRota['hideHeader']);
+    const esconderFooter = Boolean(dadosDaRota['hideFooter']);
 
     this.mostrarHeader.set(!esconderHeader);
     this.mostrarFooter.set(!esconderFooter);

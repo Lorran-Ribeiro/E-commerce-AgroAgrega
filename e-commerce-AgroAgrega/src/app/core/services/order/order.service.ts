@@ -96,11 +96,41 @@ export class OrderService {
     }
 
     try {
-      return JSON.parse(storage) as OrderModel[];
+      const orders = JSON.parse(storage) as OrderModel[];
+
+      return orders.map((order) => ({
+        ...order,
+        items: order.items.map((item) => ({
+          ...item,
+          imgSrc: this.normalizeImagePath(item.imgSrc),
+        })),
+      }));
     } catch (error) {
       console.error('Erro ao ler pedidos do localStorage:', error);
       return [];
     }
+  }
+
+  private normalizeImagePath(imagePath: string): string {
+    let img = imagePath.replace(
+      /\.(png|jpe?g|gif|bmp|tiff?|avif)(?=([?#]|$))/i,
+      '.webp',
+    );
+    if (!img.startsWith('/') && !img.startsWith('http')) {
+      img = '/' + img;
+    }
+    return img;
+  }
+
+  cancelOrder(orderId: string): void {
+    this.orders.update((orders) => {
+      return orders.map((order) => {
+        if (order.id === orderId) {
+          return { ...order, status: OrderStatus.Cancelled };
+        }
+        return order;
+      });
+    });
   }
 
   createOrder(
@@ -111,6 +141,7 @@ export class OrderService {
     shipping: number,
     paymentMethod: OrderPaymentMethod,
     address: AddressModel,
+    status: OrderStatus = OrderStatus.Pending,
   ): void {
     const userId = this.auth.currentUserId();
 
@@ -135,7 +166,7 @@ export class OrderService {
       discount,
       shipping,
       total: subtotal - discount + shipping,
-      status: OrderStatus.Pending,
+      status,
       createdAt: new Date().toISOString(),
       paymentMethod,
       address,
@@ -143,12 +174,5 @@ export class OrderService {
 
     this.orders.update((orders) => [...orders, newOrder]);
     const key = this.getStorageKey();
-
-    console.log('PEDIDO CRIADO:', newOrder);
-    console.log('PEDIDOS NO SIGNAL:', this.orders());
-    console.log(
-      'PEDIDOS NO LOCALSTORAGE:',
-      key ? localStorage.getItem(key) : 'Chave de armazenamento não encontrada',
-    );
   }
 }

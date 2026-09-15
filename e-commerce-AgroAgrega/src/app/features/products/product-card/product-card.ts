@@ -11,7 +11,9 @@ import { RouterLink } from '@angular/router';
 })
 export class ProductCardComponent {
   product = input.required<ProductModel>();
+  compareSelected = input(false);
   addToCart = output<ProductModel>();
+  toggleCompare = output<ProductModel>();
 
   adicionado = signal(false);
   imageUnavailable = signal(false);
@@ -27,6 +29,12 @@ export class ProductCardComponent {
 
   handleImageError(): void {
     this.imageUnavailable.set(true);
+  }
+
+  getDiscountPercent(product: ProductModel): number {
+    if (!product.originalPrice || product.originalPrice <= product.price) return 0;
+
+    return Math.round((1 - product.price / product.originalPrice) * 100);
   }
 
   getStars(rating: number): boolean[] {

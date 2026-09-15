@@ -1,8 +1,9 @@
 import { Component, computed, inject } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AddressService } from '@core/services/address/address.service';
 import { Auth } from '@core/services/auth/auth.service';
+import { AvatarId, AvatarService } from '@core/services/avatar/avatar.service';
 import { CepService } from '@core/services/cep/cep';
 import { OrderService } from '@core/services/order/order.service';
 import { AddressModel } from '@models/address.model';
@@ -10,7 +11,7 @@ import { errorMessages } from '@shared/constants/form-error-messages';
 
 @Component({
   selector: 'app-minha-conta',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './minha-conta.html',
   styleUrl: './minha-conta.css',
 })
@@ -21,11 +22,13 @@ export class MinhaConta {
   private readonly formBuilder = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly addressService = inject(AddressService);
+  readonly avatar = inject(AvatarService);
 
   userName = this.auth.getName();
   userEmail = this.auth.getEmail();
   userAddresses: AddressModel[] = [];
   editingProfile = false;
+  avatarPickerOpen = false;
   isAddressFormOpen = false;
   editingAddressIndex: number | null = null;
 
@@ -83,6 +86,15 @@ export class MinhaConta {
     this.editingProfile = true;
   }
 
+  toggleAvatarPicker(): void {
+    this.avatarPickerOpen = !this.avatarPickerOpen;
+  }
+
+  selectAvatar(avatarId: AvatarId): void {
+    this.avatar.selectAvatar(avatarId);
+    this.avatarPickerOpen = false;
+  }
+
   saveProfile(): void {
     if (this.profileForm.invalid) return;
 
@@ -102,7 +114,7 @@ export class MinhaConta {
     this.isAddressFormOpen = true;
     this.editingAddressIndex = null;
     this.addressForm.reset({
-      fullName: this.userName,
+      fullName: '',
       cep: '',
       address: '',
       number: '',

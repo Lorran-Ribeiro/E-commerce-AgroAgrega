@@ -1,8 +1,27 @@
 <article class="product-card">
   <div class="product-card-top">
     <span class="product-card-tag">
-      {{ (product().weeklySales ?? 0) >= 80 ? 'Mais vendido' : 'Pronta entrega' }}
+      @if (getDiscountPercent(product()) > 0) {
+        Oferta −{{ getDiscountPercent(product()) }}%
+      } @else {
+        {{ (product().weeklySales ?? 0) >= 80 ? 'Mais vendido' : 'Pronta entrega' }}
+      }
     </span>
+    <button
+      class="compare-toggle"
+      type="button"
+      [class.active]="compareSelected()"
+      [attr.aria-pressed]="compareSelected()"
+      [attr.aria-label]="
+        compareSelected()
+          ? 'Remover ' + product().title + ' da comparação'
+          : 'Adicionar ' + product().title + ' à comparação'
+      "
+      (click)="toggleCompare.emit(product())"
+    >
+      <span aria-hidden="true">{{ compareSelected() ? '✓' : '+' }}</span>
+      {{ compareSelected() ? 'Selecionado' : 'Comparar' }}
+    </button>
   </div>
 
   <div class="product-card-visual">
@@ -52,6 +71,9 @@
 
     <div class="product-card-price">
       <div class="product-card-amount">
+        @if (product().originalPrice; as originalPrice) {
+          <s>{{ originalPrice | precoFormatado }}</s>
+        }
         <strong>{{ product().price | precoFormatado }}</strong>
       </div>
     </div>

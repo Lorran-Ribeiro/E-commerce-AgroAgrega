@@ -9,20 +9,108 @@ import { Auth } from '../auth/auth.service';
   providedIn: 'root',
 })
 export class Cart {
-  //Estado inicial do carrinho, mutável apenas por ele mesmo.
+  private readonly guestCartKey = 'my-storage-cart-guest';
   private platformId = inject(PLATFORM_ID);
   private readonly keyStorage = 'my-storage-cart';
   private cartItems = signal<CartItemModel[]>([]);
+  private selectedProductIds = signal<string[] | null>(null);
+  readonly coupon = signal<CouponModel | null>(null);
   private readonly auth = inject(Auth);
-  //Retorna apenas os items do carrinho, para leitura
+  private initializedUserId: string | null | undefined = undefined;
+
   getCartItems() {
     return this.cartItems.asReadonly();
+  }
+
+  readonly selectedCartItems = computed(() => {
+    const selectedIds = this.selectedProductIds();
+    const items = this.cartItems();
+
+    if (selectedIds === null) {
+      return items;
+    }
+
+    const selection = new Set(selectedIds);
+    return items.filter((item) => selection.has(item.product.id));
+  });
+
+  readonly selectedItemsCount = computed(() =>
+    this.selectedCartItems().reduce((total, item) => total + item.quantity, 0),
+  );
+
+  readonly selectedSubtotal = computed(() =>
+    this.selectedCartItems().reduce((total, item) => total + item.product.price * item.quantity, 0),
+  );
+
+  readonly selectedOriginalSubtotal = computed(() =>
+    this.selectedCartItems().reduce(
+      (total, item) => total + (item.product.originalPrice ?? item.product.price) * item.quantity,
+      0,
+    ),
+  );
+
+  readonly selectedProductDiscount = computed(() =>
+    Math.max(0, this.selectedOriginalSubtotal() - this.selectedSubtotal()),
+  );
+
+  readonly selectedCouponDiscount = computed(() => {
+    const coupon = this.coupon();
+    return coupon ? (this.selectedSubtotal() * coupon.discountPercentage) / 100 : 0;
+  });
+
+  readonly selectedTotal = computed(() =>
+    Math.max(0, this.selectedSubtotal() - this.selectedCouponDiscount()),
+  );
+
+  readonly selectedPixDiscount = computed(() => this.selectedTotal() * 0.1);
+
+  readonly selectedPixTotal = computed(() =>
+    Math.max(0, this.selectedTotal() - this.selectedPixDiscount()),
+  );
+
+  readonly allItemsSelected = computed(
+    () =>
+      this.cartItems().length > 0 && this.selectedCartItems().length === this.cartItems().length,
+  );
+
+  isProductSelected(productId: string): boolean {
+    return this.selectedCartItems().some((item) => item.product.id === productId);
+  }
+
+  setProductSelected(productId: string, selected: boolean): void {
+    const ids = new Set(this.selectedCartItems().map((item) => item.product.id));
+
+    if (selected) {
+      ids.add(productId);
+    } else {
+      ids.delete(productId);
+    }
+
+    this.selectedProductIds.set([...ids]);
+  }
+
+  setProductsSelected(productIds: string[], selected: boolean): void {
+    const ids = new Set(this.selectedCartItems().map((item) => item.product.id));
+
+    for (const productId of productIds) {
+      if (selected) {
+        ids.add(productId);
+      } else {
+        ids.delete(productId);
+      }
+    }
+
+    this.selectedProductIds.set([...ids]);
+  }
+
+  selectAllItems(selected: boolean): void {
+    this.selectedProductIds.set(selected ? null : []);
   }
 
   private getStorageKey(): string | null {
     const userId = this.auth.currentUserId();
     if (!userId) {
-      return null;
+      return this.guestCartKey;
     }
     return `${this.keyStorage}-${userId}`;
   }
@@ -41,9 +129,62 @@ export class Cart {
       return [];
     }
     try {
-      return JSON.parse(cartItems) as CartItemModel[];
+      const parsedCartItems = JSON.parse(cartItems) as CartItemModel[];
+
+      return parsedCartItems.map((item) => ({
+        ...item,
+        product: {
+          ...item.product,
+          images: item.product.images.map((image) => {
+            let img = image.replace(/\.(png|jpe?g|gif|bmp|tiff?|avif)(?=([?#]|$))/i, '.webp');
+            if (!img.startsWith('/') && !img.startsWith('http')) {
+              img = '/' + img;
+            }
+            return img;
+          }),
+        },
+      }));
     } catch {
       return [];
+    }
+  }
+
+  private migrateGuestCart(userId: string): void {
+    if (!this.isBrowser()) {
+      return;
+    }
+
+    const guestCart = localStorage.getItem(this.guestCartKey);
+
+    if (!guestCart) {
+      return;
+    }
+
+    const userCartKey = `${this.keyStorage}-${userId}`;
+    const existingUserCart = localStorage.getItem(userCartKey);
+
+    try {
+      const guestItems = JSON.parse(guestCart) as CartItemModel[];
+
+      const userItems = existingUserCart ? (JSON.parse(existingUserCart) as CartItemModel[]) : [];
+
+      const mergedItems = [...userItems];
+
+      for (const guestItem of guestItems) {
+        const existingItem = mergedItems.find((item) => item.product.id === guestItem.product.id);
+
+        if (existingItem) {
+          existingItem.quantity += guestItem.quantity;
+        } else {
+          mergedItems.push(guestItem);
+        }
+      }
+
+      localStorage.setItem(userCartKey, JSON.stringify(mergedItems));
+
+      localStorage.removeItem(this.guestCartKey);
+    } catch (error) {
+      console.error('Erro ao migrar carrinho:', error);
     }
   }
 
@@ -59,8 +200,6 @@ export class Cart {
 
     localStorage.setItem(key, JSON.stringify(this.cartItems()));
   }
-
-  coupon = signal<CouponModel | null>(null);
 
   applyCoupon(couponCode: string): void {
     const coupon = couponCode.toUpperCase();
@@ -84,15 +223,11 @@ export class Cart {
   removeCoupon(): void {
     this.coupon.set(null);
   }
-
-  //Adiciona um produto ao carrinho
   addCartItem(product: ProductModel, quantity: number = 1): void {
     this.cartItems.update((items) => {
-      //Encontra produto
       const productFind = items.find((p) => p.product.id === product.id);
 
       if (productFind) {
-        //retorna um novo array baseado no carrinho, procura o produto e adiciona a quantidade
         return items.map((item) => {
           if (item.product.id === product.id) {
             return { ...item, quantity: item.quantity + quantity };
@@ -100,18 +235,20 @@ export class Cart {
           return item;
         });
       } else {
-        //Se não encontrar, cria o produto.
         return [...items, { product: product, quantity: quantity }];
       }
     });
+
+    const selection = this.selectedProductIds();
+    if (selection !== null && !selection.includes(product.id)) {
+      this.selectedProductIds.set([...selection, product.id]);
+    }
   }
 
   decreaseQuantity(product: ProductModel): void {
     this.cartItems.update((items) => {
-      //Procura produto que vai ser removido no array
       const productFind = items.find((p) => p.product.id === product.id);
 
-      //Remove o possível tipo undefined
       if (!productFind) {
         return items;
       }
@@ -130,11 +267,18 @@ export class Cart {
       return items.filter((item) => item.product.id !== product.id);
     });
   }
-  //Por enquanto só joga os itens fora.
+
   cleanCartItem(): void {
     this.cartItems.set([]);
+    this.selectedProductIds.set(null);
   }
-  //calcula o valor total do carrinho
+
+  removeSelectedItems(): void {
+    const selectedIds = new Set(this.selectedCartItems().map((item) => item.product.id));
+    this.cartItems.update((items) => items.filter((item) => !selectedIds.has(item.product.id)));
+    this.selectedProductIds.set(null);
+  }
+
   total = computed(() => {
     let valorTotal = this.cartItems().reduce((total, item) => {
       return total + item.product.price * item.quantity;
@@ -153,7 +297,6 @@ export class Cart {
     return discount > 0 ? discount : 0;
   });
 
-  //calcula o total de produtos do carrinho
   totalCartItens = computed(() => {
     return this.cartItems().reduce((total, item) => {
       return total + item.quantity;
@@ -172,22 +315,34 @@ export class Cart {
         return;
       }
 
-      if (!userId) {
-        this.cartItems.set([]);
-        return;
+      if (userId) {
+        this.migrateGuestCart(userId);
       }
 
       this.cartItems.set(this.getStorageCart());
+
+      this.initializedUserId = userId;
     });
 
     effect(() => {
       const userId = this.auth.currentUserId();
-      this.cartItems();
-      if (!this.isBrowser() || !userId) {
+      const items = this.cartItems();
+
+      if (!this.isBrowser()) {
         return;
       }
 
-      this.updateStorageCart();
+      if (this.initializedUserId !== userId) {
+        return;
+      }
+
+      const key = this.getStorageKey();
+
+      if (!key) {
+        return;
+      }
+
+      localStorage.setItem(key, JSON.stringify(items));
     });
   }
 

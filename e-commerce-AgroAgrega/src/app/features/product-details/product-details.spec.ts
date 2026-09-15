@@ -1,8 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
+import { render, screen } from '@testing-library/angular';
+import userEvent from '@testing-library/user-event';
 
 import { ProductDetails } from './product-details';
 import { Cart } from '../../core/services/cart/cart.service';
+import { ProductService } from '../../core/services/product/product.service';
 
 function createActivatedRoute(id: string) {
   return {
@@ -50,7 +53,7 @@ describe('ProductDetails', () => {
 
     fixture.detectChanges();
   });
-  it('should select a valid product image', () => {
+  it('deve selecionar uma imagem válida do produto', () => {
     component.product = {
       ...component.product!,
       images: ['image-1.jpg', 'image-2.jpg', 'image-3.jpg'],
@@ -61,7 +64,7 @@ describe('ProductDetails', () => {
     expect(component.selectedImageIndex).toBe(1);
     expect(component.selectedImage).toBe('image-2.jpg');
   });
-  it('should ignore an invalid image index', () => {
+  it('deve ignorar um índice de imagem inválido', () => {
     component.product = {
       ...component.product!,
       images: ['image-1.jpg', 'image-2.jpg'],
@@ -72,7 +75,7 @@ describe('ProductDetails', () => {
     expect(component.selectedImageIndex).toBe(0);
     expect(component.selectedImage).toBe('image-1.jpg');
   });
-  it('should ignore a negative image index', () => {
+  it('deve ignorar um índice de imagem negativo', () => {
     component.product = {
       ...component.product!,
       images: ['image-1.jpg', 'image-2.jpg'],
@@ -84,20 +87,57 @@ describe('ProductDetails', () => {
     expect(component.selectedImage).toBe('image-1.jpg');
   });
 
-  it('should create', () => {
+  it('deve ser criado', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should read the product id from the route', () => {
+  it('deve ler o ID do produto a partir da rota', () => {
     expect(component.id).toBe(productId);
   });
 
-  it('should find the product by id', () => {
+  it('deve encontrar o produto pelo ID', () => {
     expect(component.product).toBeTruthy();
     expect(component.product?.id).toBe(productId);
     expect(component.product?.title).toBe('Kit Estação Meteorológica Inteligente AgroSense Pro');
   });
-  it('should move to the next image', () => {
+
+  it('deve oferecer quatro visualizações enriquecidas quando há uma imagem do produto', () => {
+    expect(component.product?.images).toHaveLength(1);
+    expect(component.galleryViews).toHaveLength(4);
+    expect(component.galleryViews.map((view) => view.mode)).toEqual([
+      'main',
+      'detail',
+      'context',
+      'specification',
+    ]);
+  });
+
+  it('deve gerar galeria e informações completas para todos os produtos do catálogo', () => {
+    const products = TestBed.inject(ProductService).getProducts()();
+
+    expect(products).toHaveLength(52);
+
+    for (const product of products) {
+      component.product = product;
+
+      expect(component.galleryViews.length).toBeGreaterThanOrEqual(4);
+      expect(component.productSpecifications).toHaveLength(8);
+      expect(component.productHighlights).toHaveLength(4);
+      expect(component.productDescriptionParagraphs).toHaveLength(3);
+      expect(component.relatedProducts.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('deve registrar uma pergunta do cliente na página do produto', () => {
+    component.questionText = 'Este produto pode ser usado diariamente?';
+
+    component.submitQuestion();
+
+    expect(component.questions[0].question).toBe('Este produto pode ser usado diariamente?');
+    expect(component.questionFeedback).toContain('sucesso');
+    expect(component.questionText).toBe('');
+  });
+  it('deve mover para a próxima imagem', () => {
     component.product = {
       ...component.product!,
       images: ['image-1.jpg', 'image-2.jpg', 'image-3.jpg'],
@@ -108,7 +148,7 @@ describe('ProductDetails', () => {
     expect(component.selectedImageIndex).toBe(1);
     expect(component.selectedImage).toBe('image-2.jpg');
   });
-  it('should return to the first image after the last image', () => {
+  it('deve retornar para a primeira imagem após a última imagem', () => {
     component.product = {
       ...component.product!,
       images: ['image-1.jpg', 'image-2.jpg', 'image-3.jpg'],
@@ -120,7 +160,7 @@ describe('ProductDetails', () => {
     expect(component.selectedImageIndex).toBe(0);
     expect(component.selectedImage).toBe('image-1.jpg');
   });
-  it('should move to the previous image', () => {
+  it('deve mover para a imagem anterior', () => {
     component.product = {
       ...component.product!,
       images: ['image-1.jpg', 'image-2.jpg', 'image-3.jpg'],
@@ -132,7 +172,7 @@ describe('ProductDetails', () => {
     expect(component.selectedImageIndex).toBe(1);
     expect(component.selectedImage).toBe('image-2.jpg');
   });
-  it('should return to the last image when moving previous from the first image', () => {
+  it('deve retornar para a última imagem ao mover anterior a partir da primeira imagem', () => {
     component.product = {
       ...component.product!,
       images: ['image-1.jpg', 'image-2.jpg', 'image-3.jpg'],
@@ -143,7 +183,7 @@ describe('ProductDetails', () => {
     expect(component.selectedImageIndex).toBe(2);
     expect(component.selectedImage).toBe('image-3.jpg');
   });
-  it('should not change image when product has no images', () => {
+  it('deve não alterar a imagem quando o produto não tem imagens', () => {
     component.product = {
       ...component.product!,
       images: [],
@@ -158,7 +198,7 @@ describe('ProductDetails', () => {
     expect(component.selectedImageIndex).toBe(0);
   });
 
-  it('should increase and decrease quantity within valid range', () => {
+  it('deve aumentar e diminuir a quantidade dentro do intervalo válido', () => {
     expect(component.quantity).toBe(1);
 
     component.increaseQuantity();
@@ -174,11 +214,11 @@ describe('ProductDetails', () => {
     expect(component.quantity).toBe(1);
   });
 
-  it('should identify when product exists', () => {
+  it('deve identificar quando o produto não existe', () => {
     expect(component.productNotFound).toBeFalsy();
   });
 
-  it('should render product details', () => {
+  it('deve renderizar os detalhes do produto', () => {
     const compiled = fixture.nativeElement as HTMLElement;
 
     expect(compiled.textContent).toContain(`ID do produto: ${productId}`);
@@ -186,7 +226,7 @@ describe('ProductDetails', () => {
     expect(compiled.textContent).toContain('Adicionar ao carrinho');
   });
 
-  it('should call addCartItem with current product and quantity', () => {
+  it('deve chamar addCartItem com o produto e a quantidade atuais', () => {
     component.addToCart();
 
     expect(mockCartService.addCartItem).toHaveBeenCalledWith(component.product, component.quantity);
@@ -194,7 +234,7 @@ describe('ProductDetails', () => {
     expect(mockCartService.addCartItem).toHaveBeenCalledTimes(1);
   });
 
-  it('should call addCartItem once with the selected quantity', () => {
+  it('deve chamar addCartItem uma vez com a quantidade selecionada', () => {
     component.quantity = 3;
 
     component.addToCart();
@@ -204,7 +244,7 @@ describe('ProductDetails', () => {
     expect(mockCartService.addCartItem).toHaveBeenCalledTimes(1);
   });
 
-  it('should not call addCartItem when product does not exist', () => {
+  it('deve não chamar addCartItem quando o produto não existe', () => {
     component.product = undefined;
 
     component.addToCart();
@@ -212,7 +252,7 @@ describe('ProductDetails', () => {
     expect(mockCartService.addCartItem).not.toHaveBeenCalled();
   });
 
-  it('should not add product when quantity is invalid', () => {
+  it('deve não adicionar o produto quando a quantidade é inválida', () => {
     component.quantity = 0;
 
     component.addToCart();
@@ -220,7 +260,7 @@ describe('ProductDetails', () => {
     expect(mockCartService.addCartItem).not.toHaveBeenCalled();
   });
 
-  it('should identify when product does not exist', async () => {
+  it('deve identificar quando o produto não existe', async () => {
     await TestBed.resetTestingModule();
 
     const mockCartServiceNotFound = {
@@ -250,5 +290,41 @@ describe('ProductDetails', () => {
     expect(notFoundComponent.id).toBe('999');
     expect(notFoundComponent.product).toBeUndefined();
     expect(notFoundComponent.productNotFound).toBe(true);
+  });
+});
+
+describe('ProductDetails com Angular Testing Library', () => {
+  const productId = '1dsoifjasdf-1234-5678-90ab-cdefghijklmn';
+
+  it('deve aumentar a quantidade e adicionar o produto ao carrinho pela tela', async () => {
+    const mockCartService = {
+      addCartItem: vi.fn(),
+    };
+
+    await render(ProductDetails, {
+      providers: [
+        provideRouter([]),
+        {
+          provide: ActivatedRoute,
+          useValue: createActivatedRoute(productId),
+        },
+        {
+          provide: Cart,
+          useValue: mockCartService,
+        },
+      ],
+    });
+
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole('button', { name: 'Aumentar quantidade' }));
+    await user.click(screen.getByRole('button', { name: 'Adicionar ao carrinho' }));
+
+    expect(screen.getByText('2', { selector: '.quantity-control span' })).toBeTruthy();
+    expect(mockCartService.addCartItem).toHaveBeenCalledWith(
+      expect.objectContaining({ id: productId }),
+      2,
+    );
+    expect(screen.getByRole('status').textContent).toContain('Produto adicionado');
   });
 });

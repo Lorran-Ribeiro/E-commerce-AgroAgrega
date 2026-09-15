@@ -233,7 +233,7 @@
 
               <div class="delivery-text">
                 <span class="delivery-name">Entrega padrão</span>
-                <small>Receba em casa até 22 de agosto</small>
+                <small>{{ deliveryEstimate }}</small>
               </div>
             </div>
 
@@ -301,7 +301,27 @@
               </div>
             </div>
 
-            <span class="payment-badge muted">Até 12x</span>
+            @if (checkoutForm.controls.paymentMethod.value === PaymentMethod.CreditCard) {
+              <div class="form-group">
+                <label for="installments">Número de parcelas</label>
+
+                <select id="installments" formControlName="installments">
+                  <option value="">Selecione</option>
+                  <option value="1">1x de {{ totalValue | precoFormatado }}</option>
+                  <option value="2">2x de {{ totalValue / 2 | precoFormatado }}</option>
+                  <option value="3">3x de {{ totalValue / 3 | precoFormatado }}</option>
+                  <option value="4">4x de {{ totalValue / 4 | precoFormatado }}</option>
+                  <option value="5">5x de {{ totalValue / 5 | precoFormatado }}</option>
+                  <option value="6">6x de {{ totalValue / 6 | precoFormatado }}</option>
+                  <option value="7">7x de {{ totalValue / 7 | precoFormatado }}</option>
+                  <option value="8">8x de {{ totalValue / 8 | precoFormatado }}</option>
+                  <option value="9">9x de {{ totalValue / 9 | precoFormatado }}</option>
+                  <option value="10">10x de {{ totalValue / 10 | precoFormatado }}</option>
+                  <option value="11">11x de {{ totalValue / 11 | precoFormatado }}</option>
+                  <option value="12">12x de {{ totalValue / 12 | precoFormatado }}</option>
+                </select>
+              </div>
+            }
           </div>
 
           <div
@@ -349,7 +369,7 @@
 
               <div class="payment-text">
                 <span class="payment-name">Boleto</span>
-                <small>Vencimento em 3 dias úteis</small>
+                <small>Vencimento em {{ boletoDueDate }}</small>
               </div>
             </div>
 
@@ -362,6 +382,198 @@
             <small class="payment-error">Selecione um método de pagamento para continuar.</small>
           }
         </div>
+
+        @if (checkoutForm.controls.paymentMethod.value === PaymentMethod.Pix) {
+          <section class="payment-code-card" aria-labelledby="pix-code-title">
+            <div class="payment-code-header">
+              <div>
+                <span class="payment-code-kicker">Gerado automaticamente</span>
+                <h3 id="pix-code-title">Pague com Pix</h3>
+                <p>Escaneie o QR Code ou copie o código abaixo.</p>
+              </div>
+              <span class="payment-code-status">Expira em 30 min</span>
+            </div>
+
+            <div class="pix-code-content">
+              <div class="code-canvas-frame code-canvas-frame--qr">
+                <canvas
+                  #pixCanvas
+                  role="img"
+                  aria-label="QR Code Pix gerado para esta compra"
+                ></canvas>
+              </div>
+
+              <div class="payment-code-details">
+                <span class="payment-code-label">Pix copia e cola</span>
+                <div class="copy-code-row">
+                  <input
+                    type="text"
+                    readonly
+                    [value]="pixCopyPasteCode"
+                    aria-label="Código Pix copia e cola"
+                  />
+                  <button
+                    type="button"
+                    class="btn-copy-code"
+                    (click)="copyPaymentCode(pixCopyPasteCode, 'Código Pix')"
+                  >
+                    Copiar código
+                  </button>
+                </div>
+                <small>Válido até {{ pixExpiresAt }}.</small>
+                <button type="button" class="btn-regenerate-code" (click)="regeneratePaymentCode()">
+                  Gerar novo QR Code
+                </button>
+              </div>
+            </div>
+
+            <p class="payment-demo-notice">
+              Ambiente de demonstração: este QR Code não gera uma cobrança bancária real.
+            </p>
+            <p class="copy-feedback" aria-live="polite">{{ paymentCodeFeedback }}</p>
+          </section>
+        }
+        @if (checkoutForm.controls.paymentMethod.value === PaymentMethod.Boleto) {
+          <section class="payment-code-card" aria-labelledby="boleto-code-title">
+            <div class="payment-code-header">
+              <div>
+                <span class="payment-code-kicker">Gerado automaticamente</span>
+                <h3 id="boleto-code-title">Boleto para pagamento</h3>
+                <p>Use o código de barras ou copie a linha digitável.</p>
+              </div>
+              <span class="payment-code-status">Vence em {{ boletoDueDate }}</span>
+            </div>
+
+            <div class="code-canvas-frame code-canvas-frame--barcode">
+              <canvas
+                #boletoCanvas
+                role="img"
+                aria-label="Código de barras do boleto gerado para esta compra"
+              ></canvas>
+            </div>
+
+            <span class="payment-code-label">Linha digitável</span>
+            <div class="copy-code-row copy-code-row--boleto">
+              <input
+                type="text"
+                readonly
+                [value]="boletoDigitableLine"
+                aria-label="Linha digitável do boleto"
+              />
+              <button
+                type="button"
+                class="btn-copy-code"
+                (click)="copyPaymentCode(boletoDigitableLine, 'Linha digitável')"
+              >
+                Copiar código
+              </button>
+            </div>
+            <button type="button" class="btn-regenerate-code" (click)="regeneratePaymentCode()">
+              Gerar novo boleto
+            </button>
+
+            <p class="payment-demo-notice">
+              Ambiente de demonstração: este boleto não gera uma cobrança bancária real.
+            </p>
+            <p class="copy-feedback" aria-live="polite">{{ paymentCodeFeedback }}</p>
+          </section>
+        }
+        @if (
+          checkoutForm.controls.paymentMethod.value === PaymentMethod.CreditCard ||
+          checkoutForm.controls.paymentMethod.value === PaymentMethod.DebitCard
+        ) {
+          <div class="card-form card-group">
+            <div class="form-group">
+              <label for="cardNumber">Número do cartão</label>
+              <input
+                id="cardNumber"
+                type="text"
+                placeholder="0000 0000 0000 0000"
+                maxlength="19"
+                formControlName="cardNumber"
+              />
+              @if (
+                checkoutForm.controls.cardNumber.invalid && checkoutForm.controls.cardNumber.touched
+              ) {
+                <span class="errorMessage">
+                  {{ getErrorMessage(checkoutForm.controls.cardNumber) }}
+                </span>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="cardName">Nome no cartão</label>
+              <input
+                id="cardName"
+                type="text"
+                placeholder="NOME COMPLETO"
+                formControlName="cardName"
+              />
+              @if (
+                checkoutForm.controls.cardName.invalid && checkoutForm.controls.cardName.touched
+              ) {
+                <span class="errorMessage">
+                  {{ getErrorMessage(checkoutForm.controls.cardName) }}
+                </span>
+              }
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="cardExpiration">Validade</label>
+                <input
+                  id="cardExpiration"
+                  type="text"
+                  placeholder="MM/AA"
+                  maxlength="5"
+                  formControlName="cardExpiration"
+                />
+                @if (
+                  checkoutForm.controls.cardExpiration.invalid &&
+                  checkoutForm.controls.cardExpiration.touched
+                ) {
+                  <span class="errorMessage">
+                    {{ getErrorMessage(checkoutForm.controls.cardExpiration) }}
+                  </span>
+                }
+              </div>
+
+              <div class="form-group">
+                <label for="cardCvv">CVV</label>
+                <input
+                  id="cardCvv"
+                  type="text"
+                  placeholder="123"
+                  maxlength="4"
+                  formControlName="cardCvv"
+                />
+                @if (
+                  checkoutForm.controls.cardCvv.invalid && checkoutForm.controls.cardCvv.touched
+                ) {
+                  <span class="errorMessage">
+                    {{ getErrorMessage(checkoutForm.controls.cardCvv) }}
+                  </span>
+                }
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="cardCpf">CPF do titular</label>
+              <input
+                id="cardCpf"
+                type="text"
+                placeholder="000.000.000-00"
+                maxlength="14"
+                formControlName="cardCpf"
+              />
+              @if (checkoutForm.controls.cardCpf.invalid && checkoutForm.controls.cardCpf.touched) {
+                <span class="errorMessage">
+                  {{ getErrorMessage(checkoutForm.controls.cardCpf) }}
+                </span>
+              }
+            </div>
+          </div>
+        }
       </form>
     </section>
 
@@ -395,27 +607,20 @@
         </div>
 
         <div class="payment-safe">
-          <span class="icon-lock"
-            ><img src="assets/icones/lock_30dp_1A3D2A_FILL0_wght400_GRAD0_opsz24.svg" alt=""
-          /></span>
+          <span class="icon-lock">
+            <img src="/assets/icones/lock_30dp_1A3D2A_FILL0_wght400_GRAD0_opsz24.svg" alt="" />
+          </span>
           <span>Pagamento protegido e seguro</span>
         </div>
       </div>
 
       <div>
-        <button
-          (click)="finishOrder()"
-          class="btn-finish"
-          type="button"
-          [disabled]="checkoutForm.controls.paymentMethod.invalid"
-        >
-          Finalizar Compra
-        </button>
+        <button (click)="finishOrder()" class="btn-finish" type="button">Finalizar Compra</button>
       </div>
       <div class="support-section">
-        <span class="icon-chat"
-          ><img src="assets/icones/chat_30dp_E8F5E9_FILL0_wght400_GRAD0_opsz24.svg" alt=""
-        /></span>
+        <span class="icon-chat">
+          <img src="/assets/icones/chat_30dp_E8F5E9_FILL0_wght400_GRAD0_opsz24.svg" alt="" />
+        </span>
         <div>
           <h4>Precisa de ajuda?</h4>
           <p>Nosso time acompanha você durante a compra.</p>

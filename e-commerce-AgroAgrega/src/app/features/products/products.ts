@@ -7,9 +7,18 @@ import { Cart } from '@core/services/cart/cart.service';
 import { ProductService } from '../../core/services/product/product.service';
 import { PrecoFormatadoPipe } from '../../shared/pipes/preco-formatado-pipe';
 import { ProductCardComponent } from './product-card/product-card';
+import { ProductComparisonComponent } from './product-comparison/product-comparison';
 
 type CategoryFilter = ProductCategory | 'Todos';
 type CatalogSortOrder = 'mais_vendidos' | 'melhor_avaliados' | 'menor_preco' | 'maior_preco';
+type CatalogFilterType = 'category' | 'search' | 'brand' | 'rating' | 'price' | 'offers';
+
+interface CatalogFilterChip {
+  key: string;
+  label: string;
+  type: CatalogFilterType;
+  value?: string;
+}
 
 const PRODUCTS_PER_PAGE = 12;
 
@@ -22,7 +31,7 @@ function normalizeCatalogText(value: string): string {
 
 @Component({
   selector: 'app-products',
-  imports: [ProductCardComponent, RouterLink, PrecoFormatadoPipe],
+  imports: [ProductCardComponent, ProductComparisonComponent, RouterLink, PrecoFormatadoPipe],
   templateUrl: './products.html',
   styleUrl: './products.css',
 })
@@ -56,12 +65,16 @@ export class ProductsComponent {
   });
 
   readonly searchTerm = computed(() => (this.queryParams().get('search') ?? '').trim());
+  readonly offersOnly = computed(() => this.queryParams().get('offers') === 'true');
   readonly viewMode = signal<'grid' | 'list'>('grid');
   readonly filtersOpen = signal(false);
   readonly selectedBrands = signal<BrandOption[]>([]);
   readonly minRating = signal(0);
   readonly sortOrder = signal<CatalogSortOrder>('mais_vendidos');
   readonly currentPage = signal(1);
+  readonly comparedProductIds = signal<Set<string>>(new Set());
+  readonly comparisonOpen = signal(false);
+  readonly comparisonAnnouncement = signal('');
 
   readonly maxCatalogPrice = computed(() => {
     const highestPrice = Math.max(...this.products().map((product) => product.price), 0);
@@ -84,16 +97,57 @@ export class ProductsComponent {
 
     if (this.selectedCategory() !== 'Todos') count += 1;
     if (this.searchTerm()) count += 1;
+    if (this.offersOnly()) count += 1;
     if (this.minRating() > 0) count += 1;
     if (this.maxPriceFilter() < this.maxCatalogPrice()) count += 1;
 
     return count;
   });
 
+  readonly activeFilterChips = computed<CatalogFilterChip[]>(() => {
+    const chips: CatalogFilterChip[] = [];
+    const category = this.selectedCategory();
+    const search = this.searchTerm();
+
+    if (category !== 'Todos') {
+      chips.push({ key: 'category', label: category, type: 'category' });
+    }
+
+    if (search) {
+      chips.push({ key: 'search', label: `Busca: “${search}”`, type: 'search' });
+    }
+
+    if (this.offersOnly()) {
+      chips.push({ key: 'offers', label: 'Ofertas', type: 'offers' });
+    }
+
+    for (const brand of this.selectedBrands()) {
+      chips.push({ key: `brand-${brand}`, label: brand, type: 'brand', value: brand });
+    }
+
+    if (this.minRating() > 0) {
+      chips.push({
+        key: 'rating',
+        label: this.minRating() === 5 ? 'Nota 5' : `${this.minRating()}+ estrelas`,
+        type: 'rating',
+      });
+    }
+
+    if (this.maxPriceFilter() < this.maxCatalogPrice()) {
+      chips.push({
+        key: 'price',
+        label: `Até ${this.formatCurrency(this.maxPriceFilter())}`,
+        type: 'price',
+      });
+    }
+
+    return chips;
+  });
+
   readonly featuredProducts = computed(() =>
     [...this.products()]
       .sort((first, second) => (second.weeklySales ?? 0) - (first.weeklySales ?? 0))
-      .slice(0, 2),
+      .slice(0, 8),
   );
 
   private readonly featureProductsOnFirstPage = computed(
@@ -124,6 +178,12 @@ export class ProductsComponent {
 
         return searchableText.includes(search);
       });
+    }
+
+    if (this.offersOnly()) {
+      filtered = filtered.filter(
+        (product) => product.originalPrice !== undefined && product.originalPrice > product.price,
+      );
     }
 
     filtered = filtered.filter((product) => product.price <= maxPrice);
@@ -157,6 +217,16 @@ export class ProductsComponent {
     }
 
     return filtered;
+  });
+
+  readonly resultsLabel = computed(() => {
+    const count = this.filteredProducts().length;
+    return `${count} ${count === 1 ? 'produto encontrado' : 'produtos encontrados'}`;
+  });
+
+  readonly comparedProducts = computed(() => {
+    const comparedIds = this.comparedProductIds();
+    return this.products().filter((product) => comparedIds.has(product.id));
   });
 
   readonly catalogGridProducts = computed(() => {
@@ -213,6 +283,15 @@ export class ProductsComponent {
     });
   }
 
+  clearCatalogSearch(): void {
+    this.resetPagination();
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { search: null },
+      queryParamsHandling: 'merge',
+    });
+  }
+
   clearFilters(): void {
     this.selectedBrands.set([]);
     this.minRating.set(0);
@@ -222,9 +301,40 @@ export class ProductsComponent {
 
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { category: null, search: null },
+      queryParams: { category: null, search: null, offers: null },
       queryParamsHandling: 'merge',
     });
+  }
+
+  removeActiveFilter(filter: CatalogFilterChip): void {
+    switch (filter.type) {
+      case 'category':
+        this.selectCategory('Todos');
+        return;
+      case 'search':
+        this.clearCatalogSearch();
+        return;
+      case 'brand':
+        this.selectedBrands.update((brands) =>
+          brands.filter((brand) => brand !== filter.value),
+        );
+        break;
+      case 'rating':
+        this.minRating.set(0);
+        break;
+      case 'price':
+        this.maxPriceFilter.set(this.maxCatalogPrice());
+        break;
+      case 'offers':
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: { offers: null },
+          queryParamsHandling: 'merge',
+        });
+        return;
+    }
+
+    this.resetPagination();
   }
 
   isProductAdded(productId: string): boolean {
@@ -242,6 +352,74 @@ export class ProductsComponent {
         return newIds;
       });
     }, 2000);
+  }
+
+  isProductCompared(productId: string): boolean {
+    return this.comparedProductIds().has(productId);
+  }
+
+  toggleProductComparison(product: ProductModel): void {
+    const currentIds = this.comparedProductIds();
+
+    if (currentIds.has(product.id)) {
+      this.removeComparedProduct(product.id);
+      return;
+    }
+
+    if (currentIds.size >= 3) {
+      this.comparisonAnnouncement.set('Você pode comparar até 3 produtos por vez.');
+      return;
+    }
+
+    this.comparedProductIds.set(new Set([...currentIds, product.id]));
+    this.comparisonAnnouncement.set(
+      `${product.title} foi adicionado à comparação. ${currentIds.size + 1} de 3 selecionados.`,
+    );
+  }
+
+  removeComparedProduct(productId: string): void {
+    const product = this.products().find((item) => item.id === productId);
+    const nextIds = new Set(this.comparedProductIds());
+    nextIds.delete(productId);
+    this.comparedProductIds.set(nextIds);
+
+    if (nextIds.size < 2) {
+      this.comparisonOpen.set(false);
+    }
+
+    this.comparisonAnnouncement.set(
+      product ? `${product.title} foi removido da comparação.` : 'Produto removido da comparação.',
+    );
+  }
+
+  clearComparison(): void {
+    this.comparedProductIds.set(new Set());
+    this.comparisonOpen.set(false);
+    this.comparisonAnnouncement.set('Seleção de comparação limpa.');
+  }
+
+  openComparison(): void {
+    if (this.comparedProducts().length < 2) {
+      this.comparisonAnnouncement.set('Selecione pelo menos 2 produtos para comparar.');
+      return;
+    }
+
+    this.comparisonOpen.set(true);
+  }
+
+  closeComparison(): void {
+    this.comparisonOpen.set(false);
+  }
+
+  scrollFeaturedProducts(carousel: HTMLElement, direction: -1 | 1): void {
+    const prefersReducedMotion =
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    carousel.scrollBy({
+      left: direction * Math.max(300, carousel.clientWidth * 0.82),
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+    });
   }
 
   setViewMode(mode: 'grid' | 'list'): void {
@@ -321,5 +499,13 @@ export class ProductsComponent {
 
   private resetPagination(): void {
     this.currentPage.set(1);
+  }
+
+  private formatCurrency(value: number): string {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      maximumFractionDigits: 2,
+    }).format(value);
   }
 }
