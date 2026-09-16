@@ -57,6 +57,13 @@
                   [indeterminate]="isGroupPartiallySelected(group)"
                   (change)="toggleGroup(group, $any($event.target).checked)"
                 />
+                <img
+                  class="partner-store-logo"
+                  [src]="partnerStoreLogo(group.seller)"
+                  [alt]="group.seller + ' — loja parceira'"
+                  width="42"
+                  height="42"
+                />
                 <span>
                   Produtos de <strong>{{ group.seller }}</strong>
                   <small>Loja parceira verificada</small>

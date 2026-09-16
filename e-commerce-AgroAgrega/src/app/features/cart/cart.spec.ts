@@ -48,6 +48,9 @@ describe('CartComponent', () => {
     expect(host.querySelector('.cart-toolbar')).toBeTruthy();
     expect(host.querySelector('.share-cart')?.textContent).toContain('Compartilhar carrinho');
     expect(host.querySelector('.cart-group__header')?.textContent).toContain('AgroSense');
+    expect(host.querySelector<HTMLImageElement>('.partner-store-logo')?.getAttribute('src')).toBe(
+      '/assets/images/partner-stores/agrosense.png',
+    );
     expect(host.querySelector('.checkout-button')?.textContent).toContain('Continuar (1)');
 
     component.toggleProduct(product.id, false);

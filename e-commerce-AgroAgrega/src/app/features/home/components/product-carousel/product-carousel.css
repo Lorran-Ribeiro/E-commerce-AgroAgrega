@@ -282,8 +282,8 @@
   margin: 8px 0 0;
   padding: 4px 6px;
   border-radius: 4px;
-  background: #deebff;
-  color: #2876de;
+  background: #dff5e6;
+  color: #087f43;
   font-size: 0.67rem;
   font-weight: 850;
 }
@@ -291,17 +291,33 @@
 .product-delivery {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 6px;
   margin-top: 9px;
   color: #079447;
   font-size: 0.7rem;
 }
 
-.product-delivery span {
+.product-full-label {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 1px;
+  color: #06a64f;
+  font-style: italic;
+  line-height: 1;
+}
+
+.product-full-label > span {
   font-size: 0.86rem;
 }
 
-.product-delivery strong {
+.product-full-label > strong {
+  font-size: 0.66rem;
+  font-weight: 950;
+  letter-spacing: 0.035em;
+}
+
+.product-delivery-date {
   font-weight: 800;
 }
 

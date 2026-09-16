@@ -224,6 +224,29 @@ describe('ProductDetails', () => {
     expect(compiled.textContent).toContain(`ID do produto: ${productId}`);
     expect(compiled.textContent).toContain('Kit Estação Meteorológica Inteligente AgroSense Pro');
     expect(compiled.textContent).toContain('Adicionar ao carrinho');
+    const sellerLogos = compiled.querySelectorAll<HTMLImageElement>('.seller-logo img');
+    expect(sellerLogos).toHaveLength(2);
+    expect(sellerLogos[0]?.getAttribute('src')).toBe('/assets/images/partner-stores/agrosense.png');
+    expect(sellerLogos[0]?.alt).toContain('AgroSense');
+  });
+
+  it('deve apresentar uma estrutura visual completa nas ações principais', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    const actionSelectors = [
+      '.commerce-action--cart',
+      '.question-action',
+      '.review-action',
+      '.related-action',
+    ];
+
+    for (const selector of actionSelectors) {
+      const action = compiled.querySelector<HTMLElement>(selector);
+
+      expect(action).toBeTruthy();
+      expect(action?.querySelector('.commerce-action__icon')).toBeTruthy();
+      expect(action?.querySelector('.commerce-action__copy strong')).toBeTruthy();
+      expect(action?.querySelector('.commerce-action__arrow')).toBeTruthy();
+    }
   });
 
   it('deve chamar addCartItem com o produto e a quantidade atuais', () => {

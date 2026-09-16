@@ -295,8 +295,8 @@
   display: inline-flex;
   padding: 4px 7px;
   border-radius: 4px;
-  background: #deebff;
-  color: #2876de;
+  background: #dff5e6;
+  color: #087f43;
   font-size: 0.7rem;
   font-weight: 850;
 }
@@ -309,18 +309,33 @@
 .product-card-delivery {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 7px;
   margin: 10px 0 0;
   color: #079447;
   font-size: 0.72rem;
 }
 
-.product-card-delivery span {
-  color: #08a44e;
-  font-size: 0.92rem;
+.product-card-full-label {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 1px;
+  color: #06a64f;
+  font-style: italic;
+  line-height: 1;
 }
 
-.product-card-delivery strong {
+.product-card-full-label > span {
+  font-size: 0.9rem;
+}
+
+.product-card-full-label > strong {
+  font-size: 0.69rem;
+  font-weight: 950;
+  letter-spacing: 0.035em;
+}
+
+.product-card-delivery-date {
   font-weight: 800;
 }
 

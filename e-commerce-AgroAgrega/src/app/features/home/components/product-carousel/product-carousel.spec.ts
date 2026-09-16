@@ -47,5 +47,7 @@ describe('ProductCarousel', () => {
     expect(host.querySelector('.product-main-price small')?.textContent).toContain(
       '87 vendidos nesta semana',
     );
+    expect(host.querySelector('.product-full-label')?.textContent).toContain('FULL');
+    expect(host.querySelector('.product-coupon')?.textContent).toContain('10% OFF no Pix');
   });
 });

@@ -7,6 +7,7 @@ import { PrecoFormatadoPipe } from '../../shared/pipes/preco-formatado-pipe';
 import { RouterLink } from '@angular/router';
 import { productsItems } from '@core/data/products';
 import { ProductCardComponent } from '../products/product-card/product-card';
+import { getPartnerStoreLogo } from '../../shared/constants/partner-stores';
 
 interface CartGroup {
   seller: string;
@@ -134,6 +135,10 @@ export class CartComponent {
     }
 
     return Math.round((1 - product.price / product.originalPrice) * 100);
+  }
+
+  partnerStoreLogo(seller: string): string {
+    return getPartnerStoreLogo(seller);
   }
 
   preventEmptyCheckout(event: Event): void {

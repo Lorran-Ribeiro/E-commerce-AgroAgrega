@@ -70,8 +70,19 @@ describe('Header', () => {
     expect(host.querySelector('.compra-link')?.textContent?.trim()).toBe('Compra');
     expect(actions[0]?.classList.contains('compra-link')).toBe(true);
     expect(actions[1]?.classList.contains('icone-carrinho')).toBe(true);
-    expect(host.querySelector<HTMLImageElement>('.icone-carrinho img')?.src).toContain(
-      '/assets/fonts/icones/shop.svg',
-    );
+    expect(host.querySelector('.agro-cart-icon__basket')).not.toBeNull();
+    expect(host.querySelectorAll('.agro-cart-icon__wheel')).toHaveLength(2);
+    expect(host.querySelector('.agro-cart-icon__leaf')).not.toBeNull();
+    expect(host.querySelector('.icone-carrinho img')).toBeNull();
+  });
+
+  it('should keep the account actions and category navigation in the normal page flow', () => {
+    fixture.detectChanges();
+    const host = fixture.nativeElement as HTMLElement;
+    const actions = host.querySelector('.acoes-header');
+    const navigation = host.querySelector('.navegar-categorias');
+
+    expect(actions?.classList.contains('acoes-header-fixas')).toBe(false);
+    expect(navigation?.classList.contains('navegar-categorias-fixa')).toBe(false);
   });
 });

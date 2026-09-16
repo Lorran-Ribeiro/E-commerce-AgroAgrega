@@ -104,7 +104,7 @@
   font-weight: 600;
   cursor: pointer;
   border-radius: 0 28px 28px 0;
-  margin: left -1px;
+  margin-left: -1px;
 }
 
 .botao-busca:active {
@@ -120,22 +120,6 @@
   flex-shrink: 0;
   gap: clamp(12px, 2vw, 24px);
   margin-left: auto;
-}
-
-.acoes-header.acoes-header-fixas {
-  position: fixed;
-
-  top: 0;
-  right: max(16px, calc((100vw - 1240px) / 2));
-
-  height: 42px;
-
-  margin-left: 0;
-  padding-left: 16px;
-
-  z-index: 1100;
-
-  background-color: var(--white);
 }
 
 .account-menu-wrapper {
@@ -609,7 +593,7 @@
 .icone-carrinho {
   display: inline-flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   position: relative;
   width: 42px;
   height: 42px;
@@ -633,39 +617,90 @@
 
 .agro-cart-icon {
   position: relative;
-  display: grid;
-  width: 28px;
-  height: 30px;
-  place-items: center;
+  display: block;
+  width: 30px;
+  height: 28px;
+  color: #145a3a;
 }
 
-.agro-cart-icon img {
-  width: 25px;
-  height: 29px;
-  object-fit: contain;
-}
-
-.agro-cart-leaf {
+.agro-cart-icon__handle {
   position: absolute;
-  right: -2px;
-  bottom: 0;
-  width: 10px;
+  top: 4px;
+  left: 1px;
+  width: 8px;
+  height: 5px;
+  border-top: 2.2px solid currentColor;
+  border-left: 2.2px solid currentColor;
+  border-radius: 4px 0 0 0;
+  transform: rotate(8deg);
+}
+
+.agro-cart-icon__basket {
+  position: absolute;
+  top: 8px;
+  left: 7px;
+  width: 21px;
+  height: 12px;
+  border: 2.2px solid currentColor;
+  border-radius: 3px 3px 6px 6px;
+  background: linear-gradient(180deg, #f9fcf9 0%, #e4f2e6 100%);
+  box-shadow: inset 0 -3px 0 rgba(155, 213, 43, 0.22);
+  transform: skewX(-5deg);
+}
+
+.agro-cart-icon__basket::before {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  left: 3px;
+  height: 1.5px;
+  border-radius: 999px;
+  background: #78b73d;
+  box-shadow: 0 4px 0 #78b73d;
+  content: '';
+  opacity: 0.75;
+}
+
+.agro-cart-icon__wheel {
+  position: absolute;
+  top: 23px;
+  width: 5px;
+  height: 5px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.agro-cart-icon__wheel--left {
+  left: 10px;
+}
+
+.agro-cart-icon__wheel--right {
+  right: 2px;
+}
+
+.agro-cart-icon__leaf {
+  position: absolute;
+  z-index: 1;
+  top: 0;
+  right: -1px;
+  width: 11px;
   height: 7px;
-  border-radius: 9px 1px 9px 1px;
+  border-radius: 10px 2px 10px 2px;
   background: #9bd52b;
   box-shadow: 0 0 0 2px #f5faf6;
-  transform: rotate(-22deg);
+  transform: rotate(-18deg);
 }
 
-.agro-cart-leaf::after {
+.agro-cart-icon__leaf::after {
   position: absolute;
   top: 3px;
   left: 1px;
-  width: 8px;
+  width: 9px;
   height: 1px;
   background: #2e7d4f;
   content: '';
-  transform: rotate(-20deg);
+  transform: rotate(-16deg);
 }
 
 .contador-carrinho {
@@ -734,20 +769,6 @@
 }
 .navegar-categorias::-webkit-scrollbar {
   display: none;
-}
-
-.navegar-categorias-fixa {
-  position: fixed;
-
-  top: 0;
-  left: 0;
-  right: 0;
-
-  z-index: 1000;
-
-  background-color: var(--white);
-
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .conteudo-do-menu {
@@ -924,7 +945,7 @@
   border-radius: 50%;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
   .cabecalho-principal {
     min-height: auto;
     width: calc(100% - 24px);
@@ -934,23 +955,16 @@
     gap: 16px;
   }
 
-  .acoes-header.acoes-header-fixas {
-    right: 12px;
-    padding-left: 8px;
-    gap: 10px;
-  }
-
-  .acoes-header.acoes-header-fixas .conta-texto {
-    display: none;
-  }
-
   .logo-marca {
     order: 1;
+    flex: 0 1 auto;
   }
 
   .acoes-header {
     order: 2;
+    min-width: 0;
     margin-left: auto;
+    gap: clamp(10px, 2vw, 18px);
   }
 
   .area-busca {
@@ -962,46 +976,105 @@
   }
 
   .navegar-categorias {
-    overflow-x: auto;
+    overflow: visible;
   }
 
   .conteudo-do-menu {
-    width: max-content;
-    min-width: 100%;
-
-    padding: 0 12px;
-    gap: clamp(16px, 4vw, 24px);
-
+    width: calc(100% - 24px);
+    min-width: 0;
+    min-height: auto;
+    padding: 9px 0;
+    flex-wrap: wrap;
     justify-content: flex-start;
+    gap: 4px 8px;
+  }
+
+  .conteudo-do-menu .menu-link {
+    min-height: 38px;
+    padding: 6px 8px;
+    border-radius: 9px;
+    background: #f7faf7;
+  }
+
+  .conteudo-do-menu .menu-link:hover,
+  .conteudo-do-menu .menu-link:focus-visible {
+    background: #edf6ee;
+    opacity: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .conta-texto {
+    display: none;
+  }
+
+  .account-chevron {
+    display: none;
+  }
+
+  .conteudo-do-menu {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .conteudo-do-menu .menu-link {
+    min-width: 0;
+    min-height: 44px;
+    white-space: normal;
+    line-height: 1.2;
+  }
+
+  .conteudo-do-menu .menu-link > span:last-child {
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
 }
 
 @media (max-width: 480px) {
-  .conta-texto {
-    display: none;
+  .cabecalho-principal {
+    width: calc(100% - 20px);
+    padding: 14px 0 16px;
+    column-gap: 10px;
+    row-gap: 14px;
   }
+
   .acoes-header {
-    gap: 12px;
+    gap: 8px;
   }
+
+  .compra-link {
+    min-width: 48px;
+    padding: 0 2px;
+  }
+
   .logo-icone {
     width: 44px;
     height: 44px;
   }
+
   .logo-nome {
-    width: min(180px, 36vw);
+    width: min(140px, 28vw);
     max-height: 30px;
   }
+
   .campo-busca,
   .botao-busca {
     height: 46px;
   }
+
   .botao-busca {
-    padding: 0 16px;
+    padding: 0 14px;
+  }
+
+  .conteudo-do-menu {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (min-width: 481px) and (max-width: 640px) {
-  .conta-texto {
+@media (max-width: 360px) {
+  .logo-nome {
     display: none;
   }
 }

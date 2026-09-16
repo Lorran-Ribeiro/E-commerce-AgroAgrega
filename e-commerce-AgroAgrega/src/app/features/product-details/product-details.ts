@@ -6,6 +6,7 @@ import { Cart } from '../../core/services/cart/cart.service';
 import { ProductService } from '../../core/services/product/product.service';
 import { ProductCategory, ProductModel } from '../../models/product';
 import { PrecoFormatadoPipe } from '../../shared/pipes/preco-formatado-pipe';
+import { getPartnerStoreLogo } from '../../shared/constants/partner-stores';
 
 interface ProductReview {
   author: string;
@@ -75,7 +76,7 @@ const CATEGORY_DETAILS: Record<ProductCategory, CategoryDetailProfile> = {
   selector: 'app-product-details',
   imports: [PrecoFormatadoPipe, RouterLink, FormsModule],
   templateUrl: './product-details.html',
-  styleUrl: './product-details.css',
+  styleUrls: ['./product-details.css', './product-details-actions.css'],
 })
 export class ProductDetails implements OnInit {
   private readonly route = inject(ActivatedRoute);
@@ -196,6 +197,10 @@ export class ProductDetails implements OnInit {
 
   get sellerName(): string {
     return `${this.brandLabel} • Loja parceira`;
+  }
+
+  get sellerLogo(): string {
+    return getPartnerStoreLogo(this.product?.brand);
   }
 
   get productMeasure(): string {

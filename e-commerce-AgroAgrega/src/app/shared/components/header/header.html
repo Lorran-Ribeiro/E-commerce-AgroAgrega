@@ -20,7 +20,7 @@
         Buscar
       </button>
     </div>
-    <div class="acoes-header" [class.acoes-header-fixas]="navegacaoFixa()">
+    <div class="acoes-header">
       <div class="account-menu-wrapper">
         @if (loggedIn()) {
           <button
@@ -134,8 +134,11 @@
 
       <a class="icone-carrinho" routerLink="/cart" aria-label="Carrinho de Compras">
         <span class="agro-cart-icon" aria-hidden="true">
-          <img src="/assets/fonts/icones/shop.svg" alt="" />
-          <span class="agro-cart-leaf"></span>
+          <span class="agro-cart-icon__handle"></span>
+          <span class="agro-cart-icon__basket"></span>
+          <span class="agro-cart-icon__wheel agro-cart-icon__wheel--left"></span>
+          <span class="agro-cart-icon__wheel agro-cart-icon__wheel--right"></span>
+          <span class="agro-cart-icon__leaf"></span>
         </span>
         @if (totalItens() > 0) {
           <span class="contador-carrinho">
@@ -145,11 +148,7 @@
       </a>
     </div>
   </div>
-  <nav
-    class="navegar-categorias"
-    aria-label="Categorias de produtos"
-    [class.navegar-categorias-fixa]="navegacaoFixa()"
-  >
+  <nav class="navegar-categorias" aria-label="Categorias de produtos">
     <div class="conteudo-do-menu">
       <a class="menu-link" routerLink="/products">
         <span class="menu-icon menu-icon--all" aria-hidden="true">

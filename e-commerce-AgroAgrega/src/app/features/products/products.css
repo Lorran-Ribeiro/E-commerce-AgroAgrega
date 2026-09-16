@@ -706,11 +706,31 @@
 .featured-delivery {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 5px;
   margin-top: 6px;
   color: #079447;
   font-size: 0.65rem;
   font-weight: 800;
+}
+
+.featured-full-label {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 1px;
+  color: #06a64f;
+  font-style: italic;
+  line-height: 1;
+}
+
+.featured-full-label > span {
+  font-size: 0.82rem;
+}
+
+.featured-full-label > strong {
+  font-size: 0.6rem;
+  font-weight: 950;
+  letter-spacing: 0.035em;
 }
 
 .featured-actions {

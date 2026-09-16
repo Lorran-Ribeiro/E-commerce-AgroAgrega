@@ -80,6 +80,7 @@ describe('ProductCardComponent', () => {
     expect(host.querySelector('.product-card-main-price small')?.textContent).toContain(
       '42 vendidos nesta semana',
     );
+    expect(host.querySelector('.product-card-full-label')?.textContent).toContain('FULL');
     expect(host.querySelector('.product-card-delivery')?.textContent).toContain('Chega grátis');
   });
 });

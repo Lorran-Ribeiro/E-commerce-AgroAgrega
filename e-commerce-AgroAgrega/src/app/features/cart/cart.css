@@ -140,6 +140,20 @@
   font-weight: 500;
 }
 
+.partner-store-logo {
+  display: block;
+  width: 42px;
+  height: 42px;
+  box-sizing: border-box;
+  flex: 0 0 42px;
+  padding: 6px;
+  border: 1px solid #d7e8d8;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #fbfef9, #e7f4df);
+  object-fit: contain;
+  box-shadow: 0 4px 12px rgba(22, 91, 57, 0.08);
+}
+
 .selection-control--all > span {
   font-weight: 750;
 }

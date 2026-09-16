@@ -196,8 +196,18 @@
           </div>
 
           <a routerLink="/cart" class="buy-now" (click)="addToCart()">Comprar agora</a>
-          <button type="button" class="add-to-cart" (click)="addToCart()">
-            Adicionar ao carrinho
+          <button
+            type="button"
+            class="commerce-action commerce-action--cart add-to-cart"
+            aria-label="Adicionar ao carrinho"
+            (click)="addToCart()"
+          >
+            <span class="commerce-action__icon" aria-hidden="true">+</span>
+            <span class="commerce-action__copy">
+              <strong>Adicionar ao carrinho</strong>
+              <small>Guarde este item e finalize quando quiser</small>
+            </span>
+            <span class="commerce-action__arrow" aria-hidden="true">→</span>
           </button>
 
           <div class="purchase-protection">
@@ -208,7 +218,14 @@
           </div>
 
           <div class="seller-card">
-            <span class="seller-logo" aria-hidden="true">{{ brandLabel.charAt(0) }}</span>
+            <span class="seller-logo">
+              <img
+                [src]="sellerLogo"
+                [alt]="brandLabel + ' — loja parceira'"
+                width="48"
+                height="48"
+              />
+            </span>
             <div>
               <small>Vendido por</small>
               <strong>{{ sellerName }}</strong>
@@ -297,8 +314,19 @@
                 aria-label="Pergunta sobre o produto"
                 (keydown.enter)="submitQuestion()"
               />
-              <button type="button" (click)="submitQuestion()" [disabled]="!questionText.trim()">
-                Perguntar
+              <button
+                type="button"
+                class="commerce-action commerce-action--form question-action"
+                aria-label="Perguntar sobre o produto"
+                (click)="submitQuestion()"
+                [disabled]="!questionText.trim()"
+              >
+                <span class="commerce-action__icon" aria-hidden="true">?</span>
+                <span class="commerce-action__copy">
+                  <strong>Perguntar</strong>
+                  <small>Resposta da equipe</small>
+                </span>
+                <span class="commerce-action__arrow" aria-hidden="true">→</span>
               </button>
             </div>
             @if (questionFeedback) {
@@ -373,10 +401,17 @@
                 <span>{{ reviewText.length }}/300</span>
                 <button
                   type="button"
+                  class="commerce-action commerce-action--form review-action"
+                  aria-label="Enviar avaliação"
                   (click)="submitReview()"
                   [disabled]="selectedRating === 0 || !reviewText.trim()"
                 >
-                  Enviar avaliação
+                  <span class="commerce-action__icon" aria-hidden="true">★</span>
+                  <span class="commerce-action__copy">
+                    <strong>Enviar avaliação</strong>
+                    <small>Publicar experiência</small>
+                  </span>
+                  <span class="commerce-action__arrow" aria-hidden="true">→</span>
                 </button>
               </div>
             </div>
@@ -407,7 +442,14 @@
 
         <aside class="product-content__aside">
           <div class="aside-card">
-            <span class="seller-logo" aria-hidden="true">{{ brandLabel.charAt(0) }}</span>
+            <span class="seller-logo">
+              <img
+                [src]="sellerLogo"
+                [alt]="brandLabel + ' — loja parceira'"
+                width="48"
+                height="48"
+              />
+            </span>
             <h2>{{ brandLabel }}</h2>
             <p>Produtos selecionados para o campo com atendimento AgroAgrega.</p>
             <a routerLink="/products" [queryParams]="{ search: brandLabel }"
@@ -451,10 +493,13 @@
                 <strong>{{ related.price | precoFormatado }}</strong>
                 <button
                   type="button"
+                  class="commerce-action commerce-action--compact related-action"
                   (click)="addRelatedProduct(related)"
                   [attr.aria-label]="'Adicionar ' + related.title + ' ao carrinho'"
                 >
-                  Adicionar
+                  <span class="commerce-action__icon" aria-hidden="true">+</span>
+                  <span class="commerce-action__copy"><strong>Adicionar</strong></span>
+                  <span class="commerce-action__arrow" aria-hidden="true">→</span>
                 </button>
               </div>
             </article>
