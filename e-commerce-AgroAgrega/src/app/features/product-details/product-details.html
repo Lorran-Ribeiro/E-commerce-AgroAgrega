@@ -14,100 +14,214 @@
       </nav>
 
       <section class="product-hero" aria-labelledby="product-title">
-        <div class="gallery-panel">
-          <div class="gallery-layout">
-            <div class="image-thumbnails" aria-label="Imagens do produto">
-              @for (view of galleryViews; track view.label; let index = $index) {
-                <button
-                  type="button"
-                  class="thumbnail"
-                  [class.selected]="selectedImageIndex === index"
-                  (click)="selectImage(index)"
-                  [attr.aria-label]="view.label"
-                >
-                  <img [src]="view.src" [alt]="''" width="76" height="76" />
-                  <span>{{ view.label }}</span>
-                </button>
-              }
-            </div>
-
-            <div class="main-image">
-              @if (galleryViews.length > 1) {
-                <button
-                  type="button"
-                  class="image-navigation previous"
-                  (click)="previousImage()"
-                  aria-label="Imagem anterior"
-                >
-                  ‹
-                </button>
-              }
-
-              @if (selectedGalleryView; as currentView) {
-                @if (!imageUnavailable) {
+        <div class="product-hero__main">
+          <div class="gallery-panel">
+            <div class="gallery-layout">
+              <div class="image-thumbnails" aria-label="Imagens do produto">
+                @for (view of galleryViews; track view.label; let index = $index) {
                   <button
                     type="button"
-                    class="gallery-visual"
-                    [class.gallery-visual--detail]="currentView.mode === 'detail'"
-                    [class.gallery-visual--context]="currentView.mode === 'context'"
-                    [class.gallery-visual--specification]="currentView.mode === 'specification'"
-                    (click)="openZoom()"
-                    [attr.aria-label]="'Ampliar ' + currentView.label.toLocaleLowerCase('pt-BR')"
+                    class="thumbnail"
+                    [class.selected]="selectedImageIndex === index"
+                    (click)="selectImage(index)"
+                    [attr.aria-label]="view.label"
                   >
-                    <img
-                      [src]="currentView.src"
-                      [alt]="product.title + ' — ' + currentView.label"
-                      width="620"
-                      height="620"
-                      (error)="handleImageError()"
-                    />
-
-                    @if (currentView.mode === 'context') {
-                      <span class="visual-card-copy">
-                        <small>Uso recomendado</small>
-                        <strong>{{ categoryProfile.application }}</strong>
-                      </span>
-                    }
-
-                    @if (currentView.mode === 'specification') {
-                      <span class="visual-specs">
-                        <span
-                          ><small>Marca</small><strong>{{ brandLabel }}</strong></span
-                        >
-                        <span
-                          ><small>Apresentação</small><strong>{{ productMeasure }}</strong></span
-                        >
-                        <span
-                          ><small>Categoria</small><strong>{{ product.category }}</strong></span
-                        >
-                      </span>
-                    }
-
-                    <span class="zoom-hint"><span aria-hidden="true">⌕</span> Ampliar imagem</span>
+                    <img [src]="view.src" [alt]="''" width="76" height="76" />
+                    <span>{{ view.label }}</span>
                   </button>
-                } @else {
-                  <div
-                    class="image-fallback"
-                    role="img"
-                    [attr.aria-label]="'Imagem indisponível: ' + product.title"
+                }
+              </div>
+
+              <div class="main-image">
+                @if (galleryViews.length > 1) {
+                  <button
+                    type="button"
+                    class="image-navigation previous"
+                    (click)="previousImage()"
+                    aria-label="Imagem anterior"
                   >
-                    <strong>AgroAgrega</strong>
-                    <span>Imagem em atualização</span>
+                    ‹
+                  </button>
+                }
+
+                @if (selectedGalleryView; as currentView) {
+                  @if (!imageUnavailable) {
+                    <button
+                      type="button"
+                      class="gallery-visual"
+                      [class.gallery-visual--detail]="currentView.mode === 'detail'"
+                      [class.gallery-visual--context]="currentView.mode === 'context'"
+                      [class.gallery-visual--specification]="currentView.mode === 'specification'"
+                      (click)="openZoom()"
+                      [attr.aria-label]="'Ampliar ' + currentView.label.toLocaleLowerCase('pt-BR')"
+                    >
+                      <img
+                        [src]="currentView.src"
+                        [alt]="product.title + ' — ' + currentView.label"
+                        width="620"
+                        height="620"
+                        (error)="handleImageError()"
+                      />
+
+                      @if (currentView.mode === 'context') {
+                        <span class="visual-card-copy">
+                          <small>Uso recomendado</small>
+                          <strong>{{ categoryProfile.application }}</strong>
+                        </span>
+                      }
+
+                      @if (currentView.mode === 'specification') {
+                        <span class="visual-specs">
+                          <span
+                            ><small>Marca</small><strong>{{ brandLabel }}</strong></span
+                          >
+                          <span
+                            ><small>Apresentação</small><strong>{{ productMeasure }}</strong></span
+                          >
+                          <span
+                            ><small>Categoria</small><strong>{{ product.category }}</strong></span
+                          >
+                        </span>
+                      }
+
+                      <span class="zoom-hint"
+                        ><span aria-hidden="true">⌕</span> Ampliar imagem</span
+                      >
+                    </button>
+                  } @else {
+                    <div
+                      class="image-fallback"
+                      role="img"
+                      [attr.aria-label]="'Imagem indisponível: ' + product.title"
+                    >
+                      <strong>AgroAgrega</strong>
+                      <span>Imagem em atualização</span>
+                    </div>
+                  }
+                }
+
+                @if (galleryViews.length > 1) {
+                  <button
+                    type="button"
+                    class="image-navigation next"
+                    (click)="nextImage()"
+                    aria-label="Próxima imagem"
+                  >
+                    ›
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+
+          <section class="trust-strip" aria-label="Benefícios da compra">
+            <div>
+              <span aria-hidden="true">✓</span>
+              <p><strong>Compra segura</strong><small>Pagamento protegido</small></p>
+            </div>
+            <div>
+              <span aria-hidden="true">↗</span>
+              <p><strong>Rastreamento</strong><small>Acompanhe cada etapa</small></p>
+            </div>
+            <div>
+              <span aria-hidden="true">◎</span>
+              <p><strong>Suporte especializado</strong><small>Ajuda para sua compra</small></p>
+            </div>
+            <div>
+              <span aria-hidden="true">+</span>
+              <p><strong>Benefícios Agro+</strong><small>Vantagens para membros</small></p>
+            </div>
+          </section>
+
+          <div class="product-hero__details">
+            <section class="content-section product-overview" aria-labelledby="overview-title">
+              <span class="section-kicker">Resumo do produto</span>
+              <h2 id="overview-title">Informação para comprar com confiança</h2>
+              <div class="highlight-grid">
+                @for (highlight of productHighlights; track highlight; let index = $index) {
+                  <article>
+                    <span>{{ index + 1 }}</span>
+                    <p>{{ highlight }}</p>
+                  </article>
+                }
+              </div>
+            </section>
+
+            <section
+              class="content-section"
+              id="specifications"
+              aria-labelledby="specifications-title"
+            >
+              <span class="section-kicker">Ficha completa</span>
+              <h2 id="specifications-title">Características do produto</h2>
+              <div class="specification-table">
+                @for (
+                  specification of productSpecifications;
+                  track specification.label;
+                  let index = $index
+                ) {
+                  <div [class.specification-row--alternate]="index % 2 === 0">
+                    <span>{{ specification.label }}</span>
+                    <strong>{{ specification.value }}</strong>
                   </div>
                 }
-              }
+              </div>
+            </section>
 
-              @if (galleryViews.length > 1) {
+            <section
+              class="content-section description-section"
+              aria-labelledby="description-title"
+            >
+              <span class="section-kicker">Conheça melhor</span>
+              <h2 id="description-title">Descrição completa</h2>
+              @for (paragraph of productDescriptionParagraphs; track paragraph) {
+                <p>{{ paragraph }}</p>
+              }
+              <aside>
+                <strong>Orientação importante</strong>
+                <p>{{ categoryProfile.care }} {{ categoryProfile.support }}</p>
+              </aside>
+            </section>
+
+            <section class="content-section questions-section" aria-labelledby="questions-title">
+              <span class="section-kicker">Tire suas dúvidas</span>
+              <h2 id="questions-title">Perguntas sobre o produto</h2>
+              <div class="question-form">
+                <input
+                  type="text"
+                  [(ngModel)]="questionText"
+                  maxlength="180"
+                  placeholder="Digite sua pergunta..."
+                  aria-label="Pergunta sobre o produto"
+                  (keydown.enter)="submitQuestion()"
+                />
                 <button
                   type="button"
-                  class="image-navigation next"
-                  (click)="nextImage()"
-                  aria-label="Próxima imagem"
+                  class="commerce-action commerce-action--form question-action"
+                  aria-label="Perguntar sobre o produto"
+                  (click)="submitQuestion()"
+                  [disabled]="!questionText.trim()"
                 >
-                  ›
+                  <span class="commerce-action__icon" aria-hidden="true">?</span>
+                  <span class="commerce-action__copy">
+                    <strong>Perguntar</strong>
+                    <small>Resposta da equipe</small>
+                  </span>
+                  <span class="commerce-action__arrow" aria-hidden="true">→</span>
                 </button>
+              </div>
+              @if (questionFeedback) {
+                <p class="question-feedback" role="status">✓ {{ questionFeedback }}</p>
               }
-            </div>
+              <div class="question-list">
+                @for (item of questions; track item.question) {
+                  <article>
+                    <h3><span>P</span>{{ item.question }}</h3>
+                    <p><span>R</span>{{ item.answer }}</p>
+                  </article>
+                }
+              </div>
+            </section>
           </div>
         </div>
 
@@ -232,116 +346,190 @@
               <span>Parceiro verificado AgroAgrega</span>
             </div>
           </div>
-        </aside>
-      </section>
 
-      <section class="trust-strip" aria-label="Benefícios da compra">
-        <div>
-          <span aria-hidden="true">✓</span>
-          <p><strong>Compra segura</strong><small>Pagamento protegido</small></p>
-        </div>
-        <div>
-          <span aria-hidden="true">↗</span>
-          <p><strong>Rastreamento</strong><small>Acompanhe cada etapa</small></p>
-        </div>
-        <div>
-          <span aria-hidden="true">◎</span>
-          <p><strong>Suporte especializado</strong><small>Ajuda para sua compra</small></p>
-        </div>
-        <div>
-          <span aria-hidden="true">+</span>
-          <p><strong>Benefícios Agro+</strong><small>Vantagens para membros</small></p>
-        </div>
+          <div class="seller-assurances" aria-label="Garantias desta compra">
+            <div class="seller-assurance">
+              <span class="seller-assurance__icon" aria-hidden="true">↩</span>
+              <p>
+                <strong>Devolução grátis</strong>
+                <small>Você tem 30 dias após o recebimento para devolver o produto.</small>
+              </p>
+            </div>
+            <div class="seller-assurance">
+              <span class="seller-assurance__icon" aria-hidden="true">✓</span>
+              <p>
+                <strong>Compra Garantida</strong>
+                <small>Receba o produto esperado ou devolvemos o seu dinheiro.</small>
+              </p>
+            </div>
+            <div class="seller-assurance">
+              <span
+                class="seller-assurance__icon seller-assurance__icon--warranty"
+                aria-hidden="true"
+                >12</span
+              >
+              <p>
+                <strong>12 meses de garantia</strong>
+                <small>Cobertura de fábrica para comprar com mais tranquilidade.</small>
+              </p>
+            </div>
+          </div>
+
+          <section class="partner-store-profile" aria-labelledby="partner-store-title">
+            <header class="partner-store-profile__header">
+              <span class="seller-logo seller-logo--large">
+                <img
+                  [src]="sellerLogo"
+                  [alt]="'Logo da loja ' + brandLabel"
+                  width="58"
+                  height="58"
+                />
+              </span>
+              <div class="partner-store-profile__identity">
+                <small>Loja parceira verificada</small>
+                <h2 id="partner-store-title">
+                  {{ brandLabel }} <span class="verified-store" title="Loja verificada">✓</span>
+                </h2>
+                <span>{{ sellerFollowers }} seguidores · {{ sellerCatalogSize }} produtos</span>
+              </div>
+              <button
+                type="button"
+                class="commerce-action commerce-action--compact store-follow-button"
+                [class.store-follow-button--active]="followingStore"
+                [attr.aria-pressed]="followingStore"
+                (click)="toggleStoreFollow()"
+              >
+                <span class="commerce-action__icon" aria-hidden="true">{{
+                  followingStore ? '✓' : '+'
+                }}</span>
+                <span class="commerce-action__copy">
+                  <strong>{{ followingStore ? 'Seguindo loja' : 'Seguir loja' }}</strong>
+                  <small>{{
+                    followingStore ? 'Novidades ativadas' : 'Receba novidades e ofertas'
+                  }}</small>
+                </span>
+                <span class="commerce-action__arrow" aria-hidden="true">→</span>
+              </button>
+            </header>
+
+            <div class="partner-tier">
+              <span class="partner-tier__medal" aria-hidden="true">★</span>
+              <p>
+                <strong>Parceiro AgroAgrega Ouro</strong>
+                <small>Uma das lojas mais bem avaliadas do catálogo.</small>
+              </p>
+            </div>
+
+            <div class="partner-store-metrics" aria-label="Indicadores da loja">
+              <p>
+                <strong>{{ soldCount }}+</strong><small>vendas</small>
+              </p>
+              <p><strong>Ótimo</strong><small>atendimento</small></p>
+              <p><strong>No prazo</strong><small>nas entregas</small></p>
+            </div>
+
+            <a
+              class="commerce-action commerce-action--compact partner-store-cta"
+              routerLink="/products"
+              [queryParams]="{ search: brandLabel }"
+            >
+              <span class="commerce-action__icon" aria-hidden="true">↗</span>
+              <span class="commerce-action__copy">
+                <strong>Visitar loja parceira</strong>
+                <small>Veja todos os produtos desta loja</small>
+              </span>
+              <span class="commerce-action__arrow" aria-hidden="true">→</span>
+            </a>
+          </section>
+
+          <section class="payment-methods-card" aria-labelledby="payment-methods-title">
+            <header>
+              <span class="payment-methods-card__icon" aria-hidden="true"></span>
+              <div>
+                <small>Pagamento protegido</small>
+                <h2 id="payment-methods-title">Meios de pagamento</h2>
+              </div>
+            </header>
+            <div class="payment-method-group">
+              <strong>Cartões de crédito</strong>
+              <div class="payment-brands" aria-label="Bandeiras aceitas">
+                <span>VISA</span><span>mastercard</span><span>elo</span>
+              </div>
+            </div>
+            <div class="payment-options">
+              <span><b aria-hidden="true">◆</b> Pix</span>
+              <span><b aria-hidden="true">▤</b> Boleto</span>
+            </div>
+            <a routerLink="/cart"
+              >Confira as condições no carrinho <span aria-hidden="true">→</span></a
+            >
+          </section>
+
+          <section class="purchase-related-products" aria-labelledby="purchase-related-title">
+            <header class="purchase-related-products__heading">
+              <div>
+                <small>Escolhidos para você</small>
+                <h2 id="purchase-related-title">Produtos relacionados</h2>
+              </div>
+              <a routerLink="/products" [queryParams]="{ category: product.category }">Ver todos</a>
+            </header>
+
+            <div class="purchase-related-products__list">
+              @for (related of sidebarRelatedProducts; track related.id) {
+                <article class="purchase-related-card">
+                  <a
+                    class="purchase-related-card__image"
+                    [routerLink]="['/products', related.id]"
+                    [attr.aria-label]="'Ver ' + related.title"
+                  >
+                    <img
+                      [src]="related.images[0]"
+                      [alt]="related.title"
+                      loading="lazy"
+                      decoding="async"
+                      width="92"
+                      height="92"
+                    />
+                  </a>
+
+                  <div class="purchase-related-card__content">
+                    <span class="purchase-related-card__category">{{ related.category }}</span>
+                    <a [routerLink]="['/products', related.id]">
+                      <h3>{{ related.title }}</h3>
+                    </a>
+
+                    @if (related.originalPrice; as originalPrice) {
+                      <p class="purchase-related-card__discount">
+                        <strong
+                          >{{ calculateRelatedDiscount(related.price, originalPrice) }}% OFF</strong
+                        >
+                        <s>{{ originalPrice | precoFormatado }}</s>
+                      </p>
+                    }
+
+                    <p class="purchase-related-card__price">
+                      <strong>{{ related.price | precoFormatado }}</strong>
+                      <small>{{ getRelatedSalesLabel(related.weeklySales) }}</small>
+                    </p>
+                    <p class="purchase-related-card__pix">
+                      {{ calculateRelatedPixPrice(related.price) | precoFormatado }} no Pix
+                    </p>
+                    <p class="purchase-related-card__delivery">
+                      <span class="purchase-related-card__full" aria-label="Entrega Full">
+                        <span aria-hidden="true">⚡</span><strong>FULL</strong>
+                      </span>
+                      {{ relatedDeliveryLabel }}
+                    </p>
+                  </div>
+                </article>
+              }
+            </div>
+          </section>
+        </aside>
       </section>
 
       <div class="product-content">
         <div class="product-content__main">
-          <section class="content-section product-overview" aria-labelledby="overview-title">
-            <span class="section-kicker">Resumo do produto</span>
-            <h2 id="overview-title">Informação para comprar com confiança</h2>
-            <div class="highlight-grid">
-              @for (highlight of productHighlights; track highlight; let index = $index) {
-                <article>
-                  <span>{{ index + 1 }}</span>
-                  <p>{{ highlight }}</p>
-                </article>
-              }
-            </div>
-          </section>
-
-          <section
-            class="content-section"
-            id="specifications"
-            aria-labelledby="specifications-title"
-          >
-            <span class="section-kicker">Ficha completa</span>
-            <h2 id="specifications-title">Características do produto</h2>
-            <div class="specification-table">
-              @for (
-                specification of productSpecifications;
-                track specification.label;
-                let index = $index
-              ) {
-                <div [class.specification-row--alternate]="index % 2 === 0">
-                  <span>{{ specification.label }}</span>
-                  <strong>{{ specification.value }}</strong>
-                </div>
-              }
-            </div>
-          </section>
-
-          <section class="content-section description-section" aria-labelledby="description-title">
-            <span class="section-kicker">Conheça melhor</span>
-            <h2 id="description-title">Descrição completa</h2>
-            @for (paragraph of productDescriptionParagraphs; track paragraph) {
-              <p>{{ paragraph }}</p>
-            }
-            <aside>
-              <strong>Orientação importante</strong>
-              <p>{{ categoryProfile.care }} {{ categoryProfile.support }}</p>
-            </aside>
-          </section>
-
-          <section class="content-section questions-section" aria-labelledby="questions-title">
-            <span class="section-kicker">Tire suas dúvidas</span>
-            <h2 id="questions-title">Perguntas sobre o produto</h2>
-            <div class="question-form">
-              <input
-                type="text"
-                [(ngModel)]="questionText"
-                maxlength="180"
-                placeholder="Digite sua pergunta..."
-                aria-label="Pergunta sobre o produto"
-                (keydown.enter)="submitQuestion()"
-              />
-              <button
-                type="button"
-                class="commerce-action commerce-action--form question-action"
-                aria-label="Perguntar sobre o produto"
-                (click)="submitQuestion()"
-                [disabled]="!questionText.trim()"
-              >
-                <span class="commerce-action__icon" aria-hidden="true">?</span>
-                <span class="commerce-action__copy">
-                  <strong>Perguntar</strong>
-                  <small>Resposta da equipe</small>
-                </span>
-                <span class="commerce-action__arrow" aria-hidden="true">→</span>
-              </button>
-            </div>
-            @if (questionFeedback) {
-              <p class="question-feedback" role="status">✓ {{ questionFeedback }}</p>
-            }
-            <div class="question-list">
-              @for (item of questions; track item.question) {
-                <article>
-                  <h3><span>P</span>{{ item.question }}</h3>
-                  <p><span>R</span>{{ item.answer }}</p>
-                </article>
-              }
-            </div>
-          </section>
-
           <section
             class="content-section reviews-section"
             id="reviews"
@@ -475,34 +663,7 @@
         </div>
         <div class="related-grid">
           @for (related of relatedProducts; track related.id) {
-            <article class="related-card">
-              <a [routerLink]="['/products', related.id]" class="related-card__image">
-                <img
-                  [src]="related.images[0]"
-                  [alt]="related.title"
-                  loading="lazy"
-                  width="280"
-                  height="220"
-                />
-              </a>
-              <div>
-                <span>{{ related.rating.toFixed(1) }} ★</span>
-                <a [routerLink]="['/products', related.id]"
-                  ><h3>{{ related.title }}</h3></a
-                >
-                <strong>{{ related.price | precoFormatado }}</strong>
-                <button
-                  type="button"
-                  class="commerce-action commerce-action--compact related-action"
-                  (click)="addRelatedProduct(related)"
-                  [attr.aria-label]="'Adicionar ' + related.title + ' ao carrinho'"
-                >
-                  <span class="commerce-action__icon" aria-hidden="true">+</span>
-                  <span class="commerce-action__copy"><strong>Adicionar</strong></span>
-                  <span class="commerce-action__arrow" aria-hidden="true">→</span>
-                </button>
-              </div>
-            </article>
+            <app-product-card [product]="related" />
           }
         </div>
       </section>

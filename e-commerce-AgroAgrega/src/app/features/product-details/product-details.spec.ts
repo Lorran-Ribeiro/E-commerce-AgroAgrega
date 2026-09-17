@@ -225,7 +225,7 @@ describe('ProductDetails', () => {
     expect(compiled.textContent).toContain('Kit Estação Meteorológica Inteligente AgroSense Pro');
     expect(compiled.textContent).toContain('Adicionar ao carrinho');
     const sellerLogos = compiled.querySelectorAll<HTMLImageElement>('.seller-logo img');
-    expect(sellerLogos).toHaveLength(2);
+    expect(sellerLogos).toHaveLength(3);
     expect(sellerLogos[0]?.getAttribute('src')).toBe('/assets/images/partner-stores/agrosense.png');
     expect(sellerLogos[0]?.alt).toContain('AgroSense');
   });
@@ -236,7 +236,8 @@ describe('ProductDetails', () => {
       '.commerce-action--cart',
       '.question-action',
       '.review-action',
-      '.related-action',
+      '.store-follow-button',
+      '.partner-store-cta',
     ];
 
     for (const selector of actionSelectors) {
@@ -247,6 +248,65 @@ describe('ProductDetails', () => {
       expect(action?.querySelector('.commerce-action__copy strong')).toBeTruthy();
       expect(action?.querySelector('.commerce-action__arrow')).toBeTruthy();
     }
+  });
+
+  it('deve exibir garantias, perfil da loja e meios de pagamento abaixo do vendedor', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+
+    expect(compiled.querySelector('.seller-assurances')?.textContent).toContain('Devolução grátis');
+    expect(compiled.querySelector('.seller-assurances')?.textContent).toContain('Compra Garantida');
+    expect(compiled.querySelector('.seller-assurances')?.textContent).toContain(
+      '12 meses de garantia',
+    );
+    expect(compiled.querySelector('.partner-store-profile')).toBeTruthy();
+    expect(compiled.querySelector('.payment-methods-card')).toBeTruthy();
+  });
+
+  it('deve permitir seguir e deixar de seguir a loja parceira', () => {
+    expect(component.followingStore).toBe(false);
+
+    component.toggleStoreFollow();
+    fixture.detectChanges();
+
+    expect(component.followingStore).toBe(true);
+    expect(fixture.nativeElement.querySelector('.store-follow-button')?.textContent).toContain(
+      'Seguindo',
+    );
+  });
+
+  it('deve usar os mesmos cards do catálogo nos produtos relacionados', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+
+    expect(compiled.querySelectorAll('.related-grid app-product-card')).toHaveLength(
+      component.relatedProducts.length,
+    );
+    expect(compiled.querySelector('.related-card')).toBeNull();
+  });
+
+  it('deve exibir produtos relacionados logo abaixo dos meios de pagamento', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    const paymentMethods = compiled.querySelector('.payment-methods-card');
+    const purchaseRelated = compiled.querySelector('.purchase-related-products');
+
+    expect(purchaseRelated).toBeTruthy();
+    expect(purchaseRelated?.textContent).toContain('Produtos relacionados');
+    expect(purchaseRelated?.querySelectorAll('.purchase-related-card')).toHaveLength(
+      component.sidebarRelatedProducts.length,
+    );
+    expect(paymentMethods?.nextElementSibling).toBe(purchaseRelated);
+  });
+
+  it('deve preencher a coluna abaixo da galeria com as informações do produto', () => {
+    const compiled = fixture.nativeElement as HTMLElement;
+    const heroMain = compiled.querySelector('.product-hero__main');
+
+    expect(heroMain?.querySelector('.gallery-panel')).toBeTruthy();
+    expect(heroMain?.querySelector('.trust-strip')).toBeTruthy();
+    expect(heroMain?.querySelector('.product-overview')).toBeTruthy();
+    expect(heroMain?.querySelector('#specifications')).toBeTruthy();
+    expect(heroMain?.querySelector('.description-section')).toBeTruthy();
+    expect(heroMain?.querySelector('.questions-section')).toBeTruthy();
+    expect(compiled.querySelector('.product-content .product-overview')).toBeNull();
   });
 
   it('deve chamar addCartItem com o produto e a quantidade atuais', () => {

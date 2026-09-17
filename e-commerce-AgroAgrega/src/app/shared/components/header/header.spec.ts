@@ -3,6 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
 import { Auth } from '@core/services/auth/auth.service';
+import { Cart } from '@core/services/cart/cart.service';
+import { ProductModel } from '@models/product';
 import { Header } from './header';
 
 describe('Header', () => {
@@ -74,6 +76,30 @@ describe('Header', () => {
     expect(host.querySelectorAll('.agro-cart-icon__wheel')).toHaveLength(2);
     expect(host.querySelector('.agro-cart-icon__leaf')).not.toBeNull();
     expect(host.querySelector('.icone-carrinho img')).toBeNull();
+  });
+
+  it('should keep the cart quantity badge above the decorative leaf', () => {
+    const cart = TestBed.inject(Cart);
+    const product: ProductModel = {
+      id: 'header-cart-test',
+      title: 'Produto para teste do contador',
+      price: 10,
+      description: 'Produto de teste',
+      category: 'Insumos',
+      images: ['/assets/images/test.webp'],
+      rating: 5,
+    };
+
+    cart.cleanCartItem();
+    cart.addCartItem(product, 2);
+    fixture.detectChanges();
+
+    const counter = fixture.nativeElement.querySelector('.contador-carrinho') as HTMLElement;
+
+    expect(counter.textContent?.trim()).toBe('2');
+    expect(getComputedStyle(counter).zIndex).toBe('5');
+
+    cart.cleanCartItem();
   });
 
   it('should keep the account actions and category navigation in the normal page flow', () => {

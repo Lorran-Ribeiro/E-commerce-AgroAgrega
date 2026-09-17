@@ -7,6 +7,13 @@ import { ProductService } from '../../core/services/product/product.service';
 import { ProductCategory, ProductModel } from '../../models/product';
 import { PrecoFormatadoPipe } from '../../shared/pipes/preco-formatado-pipe';
 import { getPartnerStoreLogo } from '../../shared/constants/partner-stores';
+import {
+  calculateDiscountPercent,
+  calculatePixPrice,
+  getFreeDeliveryLabel,
+  getWeeklySalesLabel,
+} from '../../shared/utils/product-card-display';
+import { ProductCardComponent } from '../products/product-card/product-card';
 
 interface ProductReview {
   author: string;
@@ -74,7 +81,7 @@ const CATEGORY_DETAILS: Record<ProductCategory, CategoryDetailProfile> = {
 
 @Component({
   selector: 'app-product-details',
-  imports: [PrecoFormatadoPipe, RouterLink, FormsModule],
+  imports: [PrecoFormatadoPipe, RouterLink, FormsModule, ProductCardComponent],
   templateUrl: './product-details.html',
   styleUrls: ['./product-details.css', './product-details-actions.css'],
 })
@@ -101,6 +108,11 @@ export class ProductDetails implements OnInit {
   reviewText = '';
   questionText = '';
   questionFeedback = '';
+  followingStore = false;
+  readonly calculateRelatedDiscount = calculateDiscountPercent;
+  readonly calculateRelatedPixPrice = calculatePixPrice;
+  readonly getRelatedSalesLabel = getWeeklySalesLabel;
+  readonly relatedDeliveryLabel = getFreeDeliveryLabel();
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params) => {
@@ -114,6 +126,7 @@ export class ProductDetails implements OnInit {
       this.zoomOpen = false;
       this.questionText = '';
       this.questionFeedback = '';
+      this.followingStore = false;
       this.loadProductExperience();
     });
   }
@@ -203,6 +216,21 @@ export class ProductDetails implements OnInit {
     return getPartnerStoreLogo(this.product?.brand);
   }
 
+  get sellerFollowers(): string {
+    const seed = [...this.brandLabel].reduce(
+      (total, character) => total + character.charCodeAt(0),
+      0,
+    );
+    return `+${(seed % 32) + 8},${seed % 10} mil`;
+  }
+
+  get sellerCatalogSize(): number {
+    if (!this.product) return 0;
+    return this.productService
+      .getProducts()()
+      .filter((item) => item.brand === this.product?.brand).length;
+  }
+
   get productMeasure(): string {
     const match = this.product?.title.match(
       /\d+(?:[,.]\d+)?\s?(?:kg|g|l|ml|m²|m|cm|mm|w|v|cv|cc|peças|unidades|doses|setores|plantas|polegadas)/i,
@@ -238,6 +266,10 @@ export class ProductDetails implements OnInit {
       .filter((item) => item.id !== this.product?.id && item.category === this.product?.category)
       .sort((first, second) => (second.weeklySales ?? 0) - (first.weeklySales ?? 0))
       .slice(0, 4);
+  }
+
+  get sidebarRelatedProducts(): ProductModel[] {
+    return this.relatedProducts.slice(0, 3);
   }
 
   selectTab(tab: 'details' | 'reviews'): void {
@@ -290,9 +322,8 @@ export class ProductDetails implements OnInit {
     this.showCartNotification();
   }
 
-  addRelatedProduct(product: ProductModel): void {
-    this.cart.addCartItem(product);
-    this.showCartNotification();
+  toggleStoreFollow(): void {
+    this.followingStore = !this.followingStore;
   }
 
   selectRating(rating: number): void {
