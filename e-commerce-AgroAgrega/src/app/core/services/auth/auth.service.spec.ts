@@ -20,6 +20,8 @@ describe('Teste de autenticação', () => {
     }; // Cria um storage falso para o teste
                           // ambos são necessários para o Auth, já que são utilizados no login
     const tokenMock = {
+      getId: vi.fn().mockReturnValue(''),
+      checkToken: vi.fn().mockReturnValue(false),
       setToken: vi.fn(),
     }; // Cria um token falso para o teste
 
