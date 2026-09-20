@@ -130,4 +130,28 @@ describe('Cart', () => {
     expect(service.coupon()).toBeNull();
     expect(service.total()).toBe(10);
   });
+
+  it('Deve ignorar cupom inválido e calcular desconto', () => {
+    service.addCartItem(product1, 3);
+    service.applyCoupon('cupom-inexistente');
+
+    expect(service.coupon()).toBeNull();
+    expect(service.subtotal()).toBe(30);
+    expect(service.discountValue()).toBe(0);
+
+    service.applyCoupon('bemvindo10');
+    expect(service.total()).toBe(27);
+    expect(service.discountValue()).toBe(3);
+  });
+
+  it('Deve preservar quantidade ao adicionar e não alterar produto ausente', () => {
+    service.addCartItem(product1, 3);
+    service.addCartItem(product1, 2);
+    expect(service.getCartItems()()[0].quantity).toBe(5);
+
+    const otherProduct = { ...product1, id: '2' };
+    service.decreaseQuantity(otherProduct);
+    expect(service.getCartItems()()[0].quantity).toBe(5);
+  });
+
 });
