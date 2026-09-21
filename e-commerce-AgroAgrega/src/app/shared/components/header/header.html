@@ -7,19 +7,24 @@
       <img class="logo-icone" src="/assets/images/agroagrega-icon.webp" alt="AgroAgrega ícone" />
       <img class="logo-nome" src="/assets/images/AgroAgrega-logo.svg" alt="AgroAgrega" />
     </a>
-    <div class="area-busca">
+    <form
+      class="area-busca"
+      role="search"
+      (submit)="$event.preventDefault(); buscarProdutos(searchInput.value)"
+    >
+      <span class="icone-busca" aria-hidden="true"></span>
       <input
         #searchInput
         class="campo-busca"
         type="search"
         placeholder="Busque sementes, ferramentas e agroprodutos"
         aria-label="Buscar produtos"
-        (keydown.enter)="buscarProdutos(searchInput.value)"
       />
-      <button class="botao-busca" type="button" (click)="buscarProdutos(searchInput.value)">
-        Buscar
+      <button class="botao-busca" type="submit">
+        <span class="botao-busca__sparkle" aria-hidden="true"></span>
+        <span>Buscar</span>
       </button>
-    </div>
+    </form>
     <div class="acoes-header">
       <div class="account-menu-wrapper">
         @if (loggedIn()) {

@@ -1,6 +1,6 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 
 import { Auth } from '@core/services/auth/auth.service';
 import { Cart } from '@core/services/cart/cart.service';
@@ -37,6 +37,29 @@ describe('Header', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should submit the pill search with the Buscar button or Enter', () => {
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    const host = fixture.nativeElement as HTMLElement;
+    const form = host.querySelector<HTMLFormElement>('form.area-busca');
+    const input = host.querySelector<HTMLInputElement>('.campo-busca');
+    const button = host.querySelector<HTMLButtonElement>('.botao-busca');
+
+    expect(form?.getAttribute('role')).toBe('search');
+    expect(button?.type).toBe('submit');
+    expect(button?.textContent?.trim()).toBe('Buscar');
+
+    input!.value = '  sensor de umidade  ';
+    const shouldSubmit = form!.dispatchEvent(
+      new Event('submit', { bubbles: true, cancelable: true }),
+    );
+
+    expect(shouldSubmit).toBe(false);
+    expect(navigate).toHaveBeenCalledWith(['/products'], {
+      queryParams: { search: 'sensor de umidade' },
+    });
   });
 
   it('should render icons for every catalog shortcut', () => {

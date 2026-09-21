@@ -36,7 +36,6 @@ interface ProductSpecification {
 interface GalleryView {
   src: string;
   label: string;
-  mode: 'main' | 'detail' | 'context' | 'specification';
 }
 
 interface CategoryDetailProfile {
@@ -137,22 +136,10 @@ export class ProductDetails implements OnInit {
 
   get galleryViews(): GalleryView[] {
     if (!this.product || this.product.images.length === 0) return [];
-
-    if (this.product.images.length > 1) {
-      return this.product.images.map((src, index) => ({
-        src,
-        label: `Imagem ${index + 1}`,
-        mode: index === 0 ? 'main' : 'detail',
-      }));
-    }
-
-    const src = this.product.images[0];
-    return [
-      { src, label: 'Vista principal', mode: 'main' },
-      { src, label: 'Detalhe ampliado', mode: 'detail' },
-      { src, label: 'Uso no campo', mode: 'context' },
-      { src, label: 'Ficha visual', mode: 'specification' },
-    ];
+    return [...new Set(this.product.images)].map((src, index) => ({
+      src,
+      label: index === 0 ? 'Foto principal' : `Outro ângulo ${index}`,
+    }));
   }
 
   get selectedGalleryView(): GalleryView | undefined {

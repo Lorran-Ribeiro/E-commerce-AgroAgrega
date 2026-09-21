@@ -101,14 +101,15 @@ describe('ProductDetails', () => {
     expect(component.product?.title).toBe('Kit Estação Meteorológica Inteligente AgroSense Pro');
   });
 
-  it('deve oferecer quatro visualizações enriquecidas quando há uma imagem do produto', () => {
-    expect(component.product?.images).toHaveLength(1);
-    expect(component.galleryViews).toHaveLength(4);
-    expect(component.galleryViews.map((view) => view.mode)).toEqual([
-      'main',
-      'detail',
-      'context',
-      'specification',
+  it('deve mostrar apenas arquivos de imagem distintos na galeria', () => {
+    component.product = {
+      ...component.product!,
+      images: ['principal.webp', 'outro-angulo.webp', 'principal.webp'],
+    };
+
+    expect(component.galleryViews.map((view) => view.src)).toEqual([
+      'principal.webp',
+      'outro-angulo.webp',
     ]);
   });
 
@@ -120,7 +121,10 @@ describe('ProductDetails', () => {
     for (const product of products) {
       component.product = product;
 
-      expect(component.galleryViews.length).toBeGreaterThanOrEqual(4);
+      expect(component.galleryViews.length).toBeGreaterThanOrEqual(2);
+      expect(new Set(component.galleryViews.map((view) => view.src)).size).toBe(
+        component.galleryViews.length,
+      );
       expect(component.productSpecifications).toHaveLength(8);
       expect(component.productHighlights).toHaveLength(4);
       expect(component.productDescriptionParagraphs).toHaveLength(3);
@@ -236,7 +240,6 @@ describe('ProductDetails', () => {
       '.commerce-action--cart',
       '.question-action',
       '.review-action',
-      '.store-follow-button',
       '.partner-store-cta',
     ];
 
@@ -248,6 +251,13 @@ describe('ProductDetails', () => {
       expect(action?.querySelector('.commerce-action__copy strong')).toBeTruthy();
       expect(action?.querySelector('.commerce-action__arrow')).toBeTruthy();
     }
+
+    const followButton = compiled.querySelector<HTMLElement>('.store-follow-button');
+    expect(followButton?.querySelector('.commerce-action__copy strong')?.textContent).toContain(
+      'Seguir loja',
+    );
+    expect(followButton?.querySelector('.commerce-action__icon')).toBeNull();
+    expect(followButton?.querySelector('.commerce-action__arrow')).toBeNull();
   });
 
   it('deve exibir garantias, perfil da loja e meios de pagamento abaixo do vendedor', () => {
@@ -272,6 +282,12 @@ describe('ProductDetails', () => {
     expect(fixture.nativeElement.querySelector('.store-follow-button')?.textContent).toContain(
       'Seguindo',
     );
+  });
+
+  it('deve manter o botão de seguir na linha superior do perfil da loja', () => {
+    const header = fixture.nativeElement.querySelector('.partner-store-profile__header');
+
+    expect(header?.querySelector('.store-follow-button')).toBeTruthy();
   });
 
   it('deve usar os mesmos cards do catálogo nos produtos relacionados', () => {

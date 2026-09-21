@@ -18,7 +18,7 @@
           <div class="gallery-panel">
             <div class="gallery-layout">
               <div class="image-thumbnails" aria-label="Imagens do produto">
-                @for (view of galleryViews; track view.label; let index = $index) {
+                @for (view of galleryViews; track view.src; let index = $index) {
                   <button
                     type="button"
                     class="thumbnail"
@@ -49,9 +49,6 @@
                     <button
                       type="button"
                       class="gallery-visual"
-                      [class.gallery-visual--detail]="currentView.mode === 'detail'"
-                      [class.gallery-visual--context]="currentView.mode === 'context'"
-                      [class.gallery-visual--specification]="currentView.mode === 'specification'"
                       (click)="openZoom()"
                       [attr.aria-label]="'Ampliar ' + currentView.label.toLocaleLowerCase('pt-BR')"
                     >
@@ -62,27 +59,6 @@
                         height="620"
                         (error)="handleImageError()"
                       />
-
-                      @if (currentView.mode === 'context') {
-                        <span class="visual-card-copy">
-                          <small>Uso recomendado</small>
-                          <strong>{{ categoryProfile.application }}</strong>
-                        </span>
-                      }
-
-                      @if (currentView.mode === 'specification') {
-                        <span class="visual-specs">
-                          <span
-                            ><small>Marca</small><strong>{{ brandLabel }}</strong></span
-                          >
-                          <span
-                            ><small>Apresentação</small><strong>{{ productMeasure }}</strong></span
-                          >
-                          <span
-                            ><small>Categoria</small><strong>{{ product.category }}</strong></span
-                          >
-                        </span>
-                      }
 
                       <span class="zoom-hint"
                         ><span aria-hidden="true">⌕</span> Ampliar imagem</span
@@ -381,8 +357,8 @@
                 <img
                   [src]="sellerLogo"
                   [alt]="'Logo da loja ' + brandLabel"
-                  width="58"
-                  height="58"
+                  width="50"
+                  height="50"
                 />
               </span>
               <div class="partner-store-profile__identity">
@@ -399,16 +375,9 @@
                 [attr.aria-pressed]="followingStore"
                 (click)="toggleStoreFollow()"
               >
-                <span class="commerce-action__icon" aria-hidden="true">{{
-                  followingStore ? '✓' : '+'
-                }}</span>
                 <span class="commerce-action__copy">
                   <strong>{{ followingStore ? 'Seguindo loja' : 'Seguir loja' }}</strong>
-                  <small>{{
-                    followingStore ? 'Novidades ativadas' : 'Receba novidades e ofertas'
-                  }}</small>
                 </span>
-                <span class="commerce-action__arrow" aria-hidden="true">→</span>
               </button>
             </header>
 
