@@ -102,7 +102,7 @@ describe('OrderService', () => {
     userId.set('user-2');
     TestBed.flushEffects();
 
-    expect(service.getOrders()()[0].items[0].imgSrc).toBe('produto.webp');
+    expect(service.getOrders()()[0].items[0].imgSrc).toBe('/produto.webp');
     expect(service.getOrdersByUserId('missing')).toEqual([]);
   });
 
