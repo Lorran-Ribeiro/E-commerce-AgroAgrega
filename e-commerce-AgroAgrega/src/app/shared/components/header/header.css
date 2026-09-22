@@ -152,32 +152,34 @@
   min-width: 112px;
   height: 46px;
   padding: 0 17px;
-  border: 2px solid transparent;
+  border: 3px solid transparent;
   border-radius: 999px;
   background:
     linear-gradient(#f8fbf9, #f8fbf9) padding-box,
-    linear-gradient(115deg, #d8e9da, #d8e9da) border-box;
+    linear-gradient(110deg, #087f47, #36c873, #c6f5a8, #14a75e, #74df8b, #087f47)
+      border-box;
+  background-size:
+    100% 100%,
+    250% 100%;
   color: #17492f;
   font: inherit;
   font-size: 0.9rem;
   font-weight: 750;
   white-space: nowrap;
   cursor: pointer;
+  animation: brilho-busca 2.6s linear infinite;
   transition:
     transform 180ms ease,
+    box-shadow 180ms ease,
     color 180ms ease;
 }
 
 .botao-busca:hover,
 .botao-busca:focus-visible {
-  background:
-    linear-gradient(#f8fbf9, #f8fbf9) padding-box,
-    linear-gradient(110deg, #168552, #43bd74, #9fe895, #d7f7bd, #80db98, #29ad6b, #168552)
-      border-box;
-  background-size:
-    100% 100%,
-    250% 100%;
-  animation: brilho-busca 3s linear infinite;
+  box-shadow:
+    0 0 0 1px rgba(8, 127, 71, 0.35),
+    0 0 13px rgba(37, 174, 90, 0.46);
+  animation-duration: 1.6s;
 }
 
 .botao-busca:focus-visible {
@@ -214,8 +216,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .botao-busca:hover,
-  .botao-busca:focus-visible {
+  .botao-busca {
     animation: none;
   }
 }
