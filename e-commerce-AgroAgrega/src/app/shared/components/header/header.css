@@ -134,6 +134,7 @@
   font: inherit;
   font-size: 0.95rem;
   outline: none;
+  cursor: text;
 }
 
 .campo-busca::placeholder {
