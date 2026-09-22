@@ -50,6 +50,7 @@ describe('Header', () => {
     expect(form?.getAttribute('role')).toBe('search');
     expect(button?.type).toBe('submit');
     expect(button?.textContent?.trim()).toBe('Buscar');
+    expect(button?.querySelector('.botao-busca__wheat')).not.toBeNull();
 
     input!.value = '  sensor de umidade  ';
     const shouldSubmit = form!.dispatchEvent(

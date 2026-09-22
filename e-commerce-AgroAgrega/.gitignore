@@ -44,3 +44,6 @@ __screenshots__/
 Thumbs.db
 
 /temp
+
+# Arquivo de dados local preservado após a reversão
+/.local/

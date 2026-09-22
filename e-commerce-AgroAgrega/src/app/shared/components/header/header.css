@@ -163,53 +163,21 @@
   font-weight: 750;
   white-space: nowrap;
   cursor: pointer;
-  isolation: isolate;
   transition:
     transform 180ms ease,
-    box-shadow 180ms ease,
     color 180ms ease;
-}
-
-.botao-busca::before {
-  position: absolute;
-  z-index: -1;
-  inset: -5px;
-  border-radius: inherit;
-  background: linear-gradient(
-    110deg,
-    #168552,
-    #43bd74,
-    #9fe895,
-    #d7f7bd,
-    #80db98,
-    #29ad6b,
-    #168552
-  );
-  background-size: 250% 100%;
-  content: '';
-  filter: blur(8px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 220ms ease;
 }
 
 .botao-busca:hover,
 .botao-busca:focus-visible {
   background:
-    linear-gradient(#fff, #fff) padding-box,
+    linear-gradient(#f8fbf9, #f8fbf9) padding-box,
     linear-gradient(110deg, #168552, #43bd74, #9fe895, #d7f7bd, #80db98, #29ad6b, #168552)
       border-box;
   background-size:
     100% 100%,
     250% 100%;
-  box-shadow: 0 3px 14px rgba(28, 104, 69, 0.15);
   animation: brilho-busca 3s linear infinite;
-}
-
-.botao-busca:hover::before,
-.botao-busca:focus-visible::before {
-  opacity: 0.85;
-  animation: brilho-busca-glow 3s linear infinite;
 }
 
 .botao-busca:focus-visible {
@@ -221,33 +189,14 @@
   transform: scale(0.97);
 }
 
-.botao-busca__sparkle {
-  position: relative;
+.botao-busca__wheat {
+  display: block;
   width: 18px;
   height: 18px;
   flex: 0 0 18px;
-}
-
-.botao-busca__sparkle::before {
-  position: absolute;
-  top: 3px;
-  left: 1px;
-  width: 13px;
-  height: 13px;
   background: currentColor;
-  clip-path: polygon(50% 0, 63% 37%, 100% 50%, 63% 63%, 50% 100%, 37% 63%, 0 50%, 37% 37%);
-  content: '';
-}
-
-.botao-busca__sparkle::after {
-  position: absolute;
-  top: 1px;
-  right: 0;
-  width: 5px;
-  height: 5px;
-  background: #66ac77;
-  clip-path: polygon(50% 0, 63% 37%, 100% 50%, 63% 63%, 50% 100%, 37% 63%, 0 50%, 37% 37%);
-  content: '';
+  -webkit-mask: url('/assets/images/wheat-search.png') center / contain no-repeat;
+  mask: url('/assets/images/wheat-search.png') center / contain no-repeat;
 }
 
 @keyframes brilho-busca {
@@ -260,25 +209,13 @@
   to {
     background-position:
       0 0,
-      250% 0;
-  }
-}
-
-@keyframes brilho-busca-glow {
-  from {
-    background-position: 0 0;
-  }
-
-  to {
-    background-position: 250% 0;
+      100% 0;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .botao-busca:hover,
-  .botao-busca:focus-visible,
-  .botao-busca:hover::before,
-  .botao-busca:focus-visible::before {
+  .botao-busca:focus-visible {
     animation: none;
   }
 }

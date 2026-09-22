@@ -27,6 +27,10 @@ export class ProductService {
     return this.products;
   }
 
+  getDailyPopularProducts(count: number) {
+    return computed(() => selectDailyPopularProducts(this.products(), this.catalogDate(), count));
+  }
+
   getProductById(id: string): ProductModel | undefined {
     return this.products().find((product) => product.id === id);
   }
@@ -119,6 +123,37 @@ export function applyDailyFlashOffers(
   }
 
   return normalizedProducts.map((product) => dailyOffers.get(product.id) ?? product);
+}
+
+export function selectDailyPopularProducts(
+  products: ProductModel[],
+  date: Date,
+  count: number,
+): ProductModel[] {
+  const requestedCount = Number.isFinite(count) ? Math.max(0, Math.trunc(count)) : 0;
+  const safeCount = Math.min(products.length, requestedCount);
+
+  if (safeCount === 0) return [];
+
+  // Mantém a vitrine entre os campeões de venda sem repetir o mesmo grupo a cada quatro dias.
+  const popularPool = [...products]
+    .sort(
+      (first, second) =>
+        (second.weeklySales ?? 0) - (first.weeklySales ?? 0) ||
+        second.rating - first.rating ||
+        first.id.localeCompare(second.id),
+    )
+    .slice(0, safeCount * 4 - 1);
+  const dayNumber = Math.floor(
+    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86_400_000,
+  );
+  const rotationStep = popularPool.length >= safeCount * 2 + 1 ? safeCount + 1 : safeCount;
+  const startIndex = (dayNumber * rotationStep) % popularPool.length;
+
+  return Array.from(
+    { length: safeCount },
+    (_, index) => popularPool[(startIndex + index) % popularPool.length],
+  );
 }
 
 function stableProductHash(value: string): number {
