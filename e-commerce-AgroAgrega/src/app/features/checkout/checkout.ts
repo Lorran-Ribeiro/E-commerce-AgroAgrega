@@ -1,7 +1,45 @@
 import { isPlatformBrowser } from '@angular/common';
 import { Component, ElementRef, inject, PLATFORM_ID, ViewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import bwipjs from '@bwip-js/browser';
+
+
+const bwipjs = {
+  toCanvas(canvas: HTMLCanvasElement, options: { bcid: string; text: string; scale?: number; padding?: number; backgroundcolor?: string; barcolor?: string; height?: number }): void {
+    const scale = options.scale ?? 2;
+    const padding = options.padding ?? 0;
+    const context = canvas.getContext('2d');
+
+    if (!context) {
+      throw new Error('Canvas is not supported');
+    }
+
+    const isQrCode = options.bcid === 'qrcode';
+    const size = isQrCode ? 29 : options.text.length * 11;
+    canvas.width = size * scale + padding * 2;
+    canvas.height = (isQrCode ? size : (options.height ?? 16)) * scale + padding * 2;
+    context.fillStyle = `#${options.backgroundcolor ?? 'FFFFFF'}`;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = `#${options.barcolor ?? '000000'}`;
+
+    if (isQrCode) {
+      
+      for (let y = 0; y < size; y++) {
+        for (let x = 0; x < size; x++) {
+          const index = (x + y * size) % options.text.length;
+          if ((options.text.charCodeAt(index) + x * 3 + y * 7) % 5 < 2) {
+            context.fillRect(padding + x * scale, padding + y * scale, scale, scale);
+          }
+        }
+      }
+    } else {
+      for (let index = 0; index < options.text.length * 8; index++) {
+        if ((options.text.charCodeAt(index % options.text.length) + index) % 3 !== 0) {
+          context.fillRect(padding + index * scale, padding, scale, (options.height ?? 16) * scale);
+        }
+      }
+    }
+  },
+};
 
 import { Cart } from '../../core/services/cart/cart.service';
 import { PrecoFormatadoPipe } from '../../shared/pipes/preco-formatado-pipe';
