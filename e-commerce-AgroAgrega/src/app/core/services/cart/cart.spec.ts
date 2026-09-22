@@ -67,6 +67,17 @@ describe('Cart', () => {
     expect(cartItems[0].quantity).toBe(2);
   });
 
+  it('deve ajustar a quantidade sem criar itens negativos ou acima do limite', () => {
+    service.addCartItem(product1);
+
+    expect(service.setItemQuantity(product1.id, 3)).toBe(true);
+    expect(service.getCartItems()()[0].quantity).toBe(3);
+    expect(service.setItemQuantity(product1.id, 0)).toBe(false);
+    expect(service.setItemQuantity(product1.id, 100)).toBe(false);
+    expect(service.setItemQuantity('inexistente', 2)).toBe(false);
+    expect(service.getCartItems()()[0].quantity).toBe(3);
+  });
+
   it('Deve deixar o carrinho vazio', () => {
     service.addCartItem(product1);
     service.cleanCartItem();

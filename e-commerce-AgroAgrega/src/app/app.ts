@@ -7,10 +7,11 @@ import { filter } from 'rxjs';
 import { Header } from './shared/components/header/header';
 
 import { Footer } from './shared/components/footer/footer';
+import { StoreAssistant } from './shared/components/store-assistant/store-assistant';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, Header, Footer],
+  imports: [RouterOutlet, Header, Footer, StoreAssistant],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })

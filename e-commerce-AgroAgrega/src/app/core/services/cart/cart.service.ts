@@ -245,6 +245,18 @@ export class Cart {
     }
   }
 
+  setItemQuantity(productId: string, quantity: number): boolean {
+    if (!Number.isSafeInteger(quantity) || quantity < 1 || quantity > 99) return false;
+    if (!this.cartItems().some((item) => item.product.id === productId)) return false;
+
+    this.cartItems.update((items) =>
+      items.map((item) =>
+        item.product.id === productId ? { ...item, quantity } : item,
+      ),
+    );
+    return true;
+  }
+
   decreaseQuantity(product: ProductModel): void {
     this.cartItems.update((items) => {
       const productFind = items.find((p) => p.product.id === product.id);
