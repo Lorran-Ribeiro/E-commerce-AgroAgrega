@@ -29,12 +29,7 @@ export class Home implements OnInit {
 
   readonly produtosDestaque = this.productService.getProducts();
 
-  readonly maisVendidos = computed(() =>
-    [...this.produtosDestaque()]
-      .sort((a, b) => (b.weeklySales ?? 0) - (a.weeklySales ?? 0))
-      .slice(0, 6),
-  );
-
+  readonly maisVendidos = this.productService.getDailyPopularProducts(6);
 
   readonly weatherCondition = computed(() => {
   const code = this.weather()?.current.weather_code;

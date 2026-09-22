@@ -180,11 +180,7 @@ export class ProductsComponent {
     return chips;
   });
 
-  readonly featuredProducts = computed(() =>
-    [...this.products()]
-      .sort((first, second) => (second.weeklySales ?? 0) - (first.weeklySales ?? 0))
-      .slice(0, 8),
-  );
+  readonly featuredProducts = this.productService.getDailyPopularProducts(8);
 
   private readonly featureProductsOnFirstPage = computed(
     () => this.activeFilterCount() === 0 && this.sortOrder() === 'mais_vendidos',

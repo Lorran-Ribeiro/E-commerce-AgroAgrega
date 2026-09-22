@@ -1,7 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { render, screen } from '@testing-library/angular';
 import { productsItems } from '../../data/products';
-import { applyDailyFlashOffers, ProductService } from './product.service';
+import {
+  applyDailyFlashOffers,
+  ProductService,
+  selectDailyPopularProducts,
+} from './product.service';
 
 describe('ProductService', () => {
   let service: ProductService;
@@ -74,6 +78,40 @@ describe('ProductService', () => {
 
     expect(tomorrowOffers).toHaveLength(6);
     expect(tomorrowOffers.some((productId) => todayOffers.includes(productId))).toBe(false);
+  });
+
+  it('deve renovar os mais procurados diariamente sem repetir os itens do dia anterior', () => {
+    const products = service.getProducts()();
+    const selections = Array.from({ length: 7 }, (_, day) =>
+      selectDailyPopularProducts(products, new Date(2026, 8, 21 + day, 12), 8),
+    );
+    const topProducts = new Set(
+      [...products]
+        .sort((first, second) => (second.weeklySales ?? 0) - (first.weeklySales ?? 0))
+        .slice(0, 31)
+        .map((product) => product.id),
+    );
+
+    expect(selections.every((selection) => selection.length === 8)).toBe(true);
+    expect(
+      selections.every((selection) => selection.every((product) => topProducts.has(product.id))),
+    ).toBe(true);
+    expect(
+      selectDailyPopularProducts(products, new Date(2026, 8, 21, 23), 8).map(
+        (product) => product.id,
+      ),
+    ).toEqual(selections[0].map((product) => product.id));
+
+    for (let day = 1; day < selections.length; day += 1) {
+      const previousIds = new Set(selections[day - 1].map((product) => product.id));
+      expect(selections[day].some((product) => previousIds.has(product.id))).toBe(false);
+    }
+
+    const todayHome = selectDailyPopularProducts(products, new Date(2026, 8, 21), 6);
+    const tomorrowHome = selectDailyPopularProducts(products, new Date(2026, 8, 22), 6);
+    const todayHomeIds = new Set(todayHome.map((product) => product.id));
+    expect(todayHome).toHaveLength(6);
+    expect(tomorrowHome.some((product) => todayHomeIds.has(product.id))).toBe(false);
   });
 
   it('deve adicinar uma avaliacao e recalcular a classificacao do produto', () => {
