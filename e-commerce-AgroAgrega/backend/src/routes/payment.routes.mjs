@@ -5,7 +5,9 @@ export function createPaymentRouter(paymentService) {
 
   router.post('/', async (req, res) => {
     try {
-      const payment = await paymentService.createTestOrder();
+      const { totalAmount } = req.body;
+
+      const payment = await paymentService.createTestOrder(totalAmount);
 
       return res.status(201).json(payment);
     } catch (error) {

@@ -72,6 +72,11 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "allowedHosts": [
+              "monitoring-negotiations-raleigh-propecia.trycloudflare.com"
+            ]
+          },
           "configurations": {
             "production": {
               "buildTarget": "e-commerce-AgroAgrega:build:production"

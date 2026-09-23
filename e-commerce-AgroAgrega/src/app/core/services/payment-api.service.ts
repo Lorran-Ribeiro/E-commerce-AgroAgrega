@@ -6,6 +6,15 @@ export interface PaymentResponse {
   id: string;
   status: string;
   checkoutUrl: string;
+  totalAmount: string;
+}
+
+export interface PaymentStatusResponse {
+  id: string;
+  status: string;
+  statusDetail: string;
+  totalAmount: string;
+  totalPaidAmount: number;
 }
 
 @Injectable({
@@ -14,9 +23,18 @@ export interface PaymentResponse {
 export class PaymentApiService {
   private readonly http = inject(HttpClient);
 
-  private readonly apiUrl = 'http://localhost:3000/api/payments';
+  private readonly apiUrl =
+    'https://invited-ottawa-scenario-caution.trycloudflare.com/api/payments';
 
-  criarPedidoTeste(): Observable<PaymentResponse> {
-    return this.http.post<PaymentResponse>(this.apiUrl, {});
+  criarPedidoTeste(totalAmount: number): Observable<PaymentResponse> {
+    return this.http.post<PaymentResponse>(this.apiUrl, {
+      totalAmount,
+    });
+  }
+
+  consultarPedido(orderId: string): Observable<PaymentStatusResponse> {
+    return this.http.get<PaymentStatusResponse>(
+      `${this.apiUrl}/${orderId}`,
+    );
   }
 }
