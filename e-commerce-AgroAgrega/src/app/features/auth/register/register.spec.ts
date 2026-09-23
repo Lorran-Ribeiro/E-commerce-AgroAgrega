@@ -30,6 +30,7 @@ describe('Register', () => {
     expect(component).toBeTruthy();
   });
 
+  // Confirma as mensagens exibidas quando os campos obrigatórios estão vazios.
   it('deve exibir erros quando o formulário está inválido', () => {
     component.onSubmit({ preventDefault: vi.fn() } as unknown as SubmitEvent);
 
@@ -39,6 +40,7 @@ describe('Register', () => {
     expect(component.passwordConfirmationError()).toBe('Confirme sua senha.');
   });
 
+  // Verifica a validação de confirmação e o tratamento de email já cadastrado.
   it('deve rejeitar senhas diferentes e cadastro recusado', () => {
     component.registerForm.setValue({
       name: 'Cliente AgroAgrega',
@@ -56,6 +58,7 @@ describe('Register', () => {
     expect(component.registerError()).toBe('Email Já Cadastrado!');
   });
 
+  // Confirma a sanitização dos dados e o envio de um cadastro válido ao serviço.
   it('deve sanitizar e registrar dados válidos', () => {
     component.registerForm.setValue({
       name: '  Cliente AgroAgrega  ',

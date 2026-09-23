@@ -7,6 +7,7 @@ import { SHA256 } from 'crypto-js';
 import { UserModel } from '@models/user';
 
 describe('Teste de autenticação', () => {
+  // Confirma o login válido, a criação da sessão e a atualização do usuário atual.
   it('Deve retornar true se login for efetuado com sucesso', () => {
     const user: UserModel = {
       id: '1',
@@ -40,6 +41,7 @@ describe('Teste de autenticação', () => {
     expect(result).toBe(true);
   });
 
+  // Verifica as duas falhas possíveis do login sem criar um token.
   it('deve rejeitar usuário inexistente e senha incorreta', () => {
     const storageMock = { getUser: vi.fn().mockReturnValue(null) };
     const tokenMock = { getId: vi.fn().mockReturnValue(''), checkToken: vi.fn() };
@@ -62,6 +64,7 @@ describe('Teste de autenticação', () => {
     expect(auth.login('john@email.com', '123456')).toBe(false);
   });
 
+  // Exercita o cadastro bem-sucedido e a resposta quando o email já está registrado.
   it('deve registrar usuário e tratar falha de persistência', () => {
     const storageMock = {
       getUser: vi.fn(),
@@ -94,6 +97,7 @@ describe('Teste de autenticação', () => {
     });
   });
 
+  // Confirma a delegação das operações de perfil, senha, logout e exclusão da conta.
   it('deve delegar perfil, reset, logout e remoção da conta', () => {
     const storageMock = {
       updatePasswordUser: vi.fn().mockReturnValue({ res: true, message: '' }),
@@ -131,6 +135,7 @@ describe('Teste de autenticação', () => {
     expect(auth.currentUserId()).toBeNull();
   });
 
+  // Garante que não exista remoção quando nenhuma sessão está identificada.
   it('deve retornar falso ao remover conta sem usuário', () => {
     const tokenMock = { getId: vi.fn().mockReturnValue('') };
     TestBed.configureTestingModule({

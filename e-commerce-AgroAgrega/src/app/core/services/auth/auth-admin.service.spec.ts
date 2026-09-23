@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { AuthAdminService } from './auth-admin.service';
 
 describe('AuthAdminService', () => {
+  // Verifica o login administrativo válido e a rejeição de uma senha incorreta.
   it('deve aceitar e rejeitar credenciais administrativas', () => {
     TestBed.configureTestingModule({ providers: [AuthAdminService] });
     const service = TestBed.inject(AuthAdminService);

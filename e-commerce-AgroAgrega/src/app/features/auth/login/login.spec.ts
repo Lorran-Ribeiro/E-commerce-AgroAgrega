@@ -26,6 +26,7 @@ describe('Login', () => {
     expect(component).toBeTruthy();
   });
 
+  // Confirma que os campos obrigatórios são validados antes de chamar o serviço.
   it('deve validar email e senha antes de autenticar', () => {
     const event = { preventDefault: vi.fn() } as unknown as SubmitEvent;
     component.onSubmit(event);
@@ -40,6 +41,7 @@ describe('Login', () => {
     expect(component.passwordError()).toBe('Informe sua senha.');
   });
 
+  // Verifica a limpeza dos dados, a mensagem de falha e o controle de visibilidade da senha.
   it('deve sanitizar dados, exibir erro e navegar após login', () => {
     authMock.login.mockReturnValue(false);
     const event = { preventDefault: vi.fn() } as unknown as SubmitEvent;
@@ -58,6 +60,7 @@ describe('Login', () => {
     expect(component.loginError()).toBe('');
   });
 
+  // Garante que a senha vazia não seja exibida e que os erros possam ser zerados.
   it('deve alternar senha somente quando houver valor e limpar erros', () => {
     component.togglePassword();
     expect(component.showPassword()).toBe(false);

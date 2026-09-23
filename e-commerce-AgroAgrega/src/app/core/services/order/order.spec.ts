@@ -20,6 +20,7 @@ describe('OrderService', () => {
     expect(service).toBeTruthy();
   });
 
+  // Exercita o ciclo autenticado de criação, consulta, persistência e cancelamento.
   it('deve criar, consultar e cancelar um pedido autenticado', () => {
     const userId = signal('user-1');
     TestBed.resetTestingModule();
@@ -72,6 +73,7 @@ describe('OrderService', () => {
     expect(service.getOrderById(orders[0].id)?.status).toBe(OrderStatus.Cancelled);
   });
 
+  // Confirma a restauração do storage e a conversão das extensões de imagem para webp.
   it('deve restaurar pedidos persistidos e normalizar imagens', async () => {
     const userId = signal<string | null>('user-2');
     localStorage.setItem(
@@ -106,6 +108,7 @@ describe('OrderService', () => {
     expect(service.getOrdersByUserId('missing')).toEqual([]);
   });
 
+  // Garante que pedidos não sejam criados sem usuário e que storage corrompido seja ignorado.
   it('deve ignorar criação sem autenticação e storage inválido', () => {
     const userId = signal<string | null>(null);
     TestBed.resetTestingModule();

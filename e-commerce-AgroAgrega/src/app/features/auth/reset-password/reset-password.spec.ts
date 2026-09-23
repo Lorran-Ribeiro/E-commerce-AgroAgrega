@@ -30,6 +30,7 @@ describe('ResetPassword', () => {
     expect(component).toBeTruthy();
   });
 
+  // Exercita senha vazia, senha curta e confirmação divergente.
   it('deve validar senha e confirmação', () => {
     const event = { preventDefault: vi.fn() } as unknown as SubmitEvent;
     component.onSubmit(event);
@@ -46,6 +47,7 @@ describe('ResetPassword', () => {
     expect(component.passwordConfirmationError()).toBe('As senhas precisam ser iguais.');
   });
 
+  // Confirma o erro sem email, os toggles de senha e a limpeza dos estados.
   it('deve informar email ausente e limpar estados de interação', () => {
     component.resetForm.setValue({ password: '123456', passwordConfirmation: '123456' });
     component.onSubmit({ preventDefault: vi.fn() } as unknown as SubmitEvent);

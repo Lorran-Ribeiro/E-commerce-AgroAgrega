@@ -19,12 +19,14 @@ describe('StorageService', () => {
     service = TestBed.inject(StorageService);
   });
 
+  // Confirma a criação do primeiro usuário e a leitura dos dados persistidos.
   it('deve criar e buscar um usuário', () => {
     expect(service.setUser(user)).toEqual({ res: true, message: '' });
     expect(service.getUser(user.email)).toEqual(user);
     expect(service.getAllUsers()).toContain(user.email);
   });
 
+  // Garante que dois usuários não possam compartilhar o mesmo endereço de email.
   it('deve rejeitar email duplicado', () => {
     service.setUser(user);
 
@@ -34,6 +36,7 @@ describe('StorageService', () => {
     });
   });
 
+  // Verifica as três operações de atualização disponíveis para um usuário existente.
   it('deve atualizar senha, email e perfil', () => {
     service.setUser(user);
 
@@ -47,6 +50,7 @@ describe('StorageService', () => {
     });
   });
 
+  // Exercita as respostas de erro quando o banco ainda não foi criado.
   it('deve informar erros para banco ausente e usuário inexistente', () => {
     expect(service.updatePasswordUser(user.email, 'hash')).toEqual({
       res: false,
@@ -63,6 +67,7 @@ describe('StorageService', () => {
     expect(service.removeUser(user.id)).toBe(false);
   });
 
+  // Garante que perfis inexistentes e emails já utilizados sejam rejeitados.
   it('deve impedir perfil inexistente ou email já usado', () => {
     const otherUser = { ...user, id: 'user-2', email: 'outro@example.com' };
     service.setUser(user);
@@ -82,6 +87,7 @@ describe('StorageService', () => {
     });
   });
 
+  // Confirma a remoção e o tratamento seguro de dados corrompidos no storage.
   it('deve remover usuário e tratar dados inválidos', () => {
     service.setUser(user);
     expect(service.removeUser(user.id)).toBe(true);

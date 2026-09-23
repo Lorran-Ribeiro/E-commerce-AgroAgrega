@@ -33,6 +33,7 @@ describe('Cart', () => {
     originalPrice: 25,
     brand: 'AgroSense',
   };
+  // Confirma a inclusão de um novo produto com quantidade inicial igual a um.
   it('deve adicionar um produto ao carrinho', () => {
     service.addCartItem(product1);
     const items = service.getCartItems()();
@@ -41,6 +42,7 @@ describe('Cart', () => {
     expect(items[0].quantity).toBe(1);
   });
 
+  // Verifica a remoção completa de um produto já incluído.
   it('deve remover um produto do carrinho', () => {
     service.addCartItem(product1);
     service.removeCartItem(product1);
@@ -48,6 +50,7 @@ describe('Cart', () => {
     expect(cartItems.length).toBe(0);
   });
 
+  // Garante que diminuir a quantidade preserve o item enquanto houver unidades.
   it('Deve remover uma quantidade do produto', () => {
     service.addCartItem(product1);
     service.addCartItem(product1);
@@ -58,6 +61,7 @@ describe('Cart', () => {
     expect(cartItems[0].quantity).toBe(1);
   });
 
+  // Confirma que adicionar o mesmo produto soma quantidades em vez de duplicar linhas.
   it('Deve adicionar duas quantidades do produto', () => {
     service.addCartItem(product1);
     service.addCartItem(product1);
@@ -67,6 +71,7 @@ describe('Cart', () => {
     expect(cartItems[0].quantity).toBe(2);
   });
 
+  // Valida limites aceitos e rejeitados ao definir uma quantidade diretamente.
   it('deve ajustar a quantidade sem criar itens negativos ou acima do limite', () => {
     service.addCartItem(product1);
 
@@ -78,6 +83,7 @@ describe('Cart', () => {
     expect(service.getCartItems()()[0].quantity).toBe(3);
   });
 
+  // Confirma a limpeza de todos os produtos do carrinho.
   it('Deve deixar o carrinho vazio', () => {
     service.addCartItem(product1);
     service.cleanCartItem();
@@ -85,6 +91,7 @@ describe('Cart', () => {
     expect(cartItems.length).toBe(0);
   });
 
+  // Verifica o recálculo do valor total após novas inclusões.
   it('Deve atualizar o total ao adicionar um produto', () => {
     expect(service.total()).toBe(0);
 
@@ -97,6 +104,7 @@ describe('Cart', () => {
     expect(service.total()).toBe(20);
   });
 
+  // Confirma o recálculo do total após diminuir e remover produtos.
   it('Deve atualizar o total ao remover um produto', () => {
     service.addCartItem(product1);
     service.addCartItem(product1);
@@ -107,6 +115,7 @@ describe('Cart', () => {
     expect(service.total()).toBe(0);
   });
 
+  // Verifica o contador total de unidades adicionadas.
   it('Deve atualizar a quantidade total de itens no carrinho ao adicionar', () => {
     expect(service.totalCartItens()).toBe(0);
     service.addCartItem(product1);
@@ -115,6 +124,7 @@ describe('Cart', () => {
     expect(service.totalCartItens()).toBe(2);
   });
 
+  // Confirma o contador depois de diminuir e remover unidades.
   it('Deve atualizar a quantidade total de itens no carrinho ao adicionar', () => {
     service.addCartItem(product1);
     service.addCartItem(product1);
@@ -125,6 +135,7 @@ describe('Cart', () => {
     expect(service.totalCartItens()).toBe(0);
   });
 
+  // Garante que o estado vazio acompanhe a entrada e a remoção do produto.
   it('Deve mostrar que o carrinho está vazio', () => {
     service.addCartItem(product1);
     expect(service.isEmpty()).toBe(false);
@@ -132,6 +143,7 @@ describe('Cart', () => {
     expect(service.isEmpty()).toBe(true);
   });
 
+  // Verifica a aplicação de um cupom válido e o desconto no total.
   it('Deve aplicar um cupom de desconto', () => {
     const couponCode = 'BEMVINDO10';
     service.addCartItem(product1);
@@ -140,6 +152,7 @@ describe('Cart', () => {
     expect(service.total()).toBe(9);
   });
 
+  // Confirma a retirada do cupom e a restauração do valor original.
   it('Deve remover o cupom de desconto', () => {
     const couponCode = 'BEMVINDO10';
     service.addCartItem(product1);
@@ -149,6 +162,7 @@ describe('Cart', () => {
     expect(service.coupon()).toBeNull();
     expect(service.total()).toBe(10);
   });
+  // Exercita subtotal, descontos e total considerando apenas itens selecionados.
   it('deve calcular o resumo somente com os produtos selecionados', () => {
     service.addCartItem(product1);
     service.addCartItem(product2);
@@ -165,6 +179,7 @@ describe('Cart', () => {
     expect(service.selectedPixTotal()).toBeCloseTo(16.2);
   });
 
+  // Garante que a finalização remova somente os itens marcados para compra.
   it('deve remover após a compra apenas os produtos selecionados', () => {
     service.addCartItem(product1);
     service.addCartItem(product2);
@@ -176,6 +191,7 @@ describe('Cart', () => {
     expect(service.allItemsSelected()).toBe(true);
   });
 
+  // Verifica a rejeição de cupom inválido e o cálculo posterior de desconto válido.
   it('Deve ignorar cupom inválido e calcular desconto', () => {
     service.addCartItem(product1, 3);
     service.applyCoupon('cupom-inexistente');
@@ -189,6 +205,7 @@ describe('Cart', () => {
     expect(service.discountValue()).toBe(3);
   });
 
+  // Confirma a soma de quantidades e que um produto inexistente não altera o carrinho.
   it('Deve preservar quantidade ao adicionar e não alterar produto ausente', () => {
     service.addCartItem(product1, 3);
     service.addCartItem(product1, 2);

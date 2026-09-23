@@ -12,6 +12,7 @@ describe('TokenAuth', () => {
     service = TestBed.inject(TokenAuth);
   });
 
+  // Verifica a criação do token e a leitura dos dados do usuário autenticado.
   it('deve criar um token válido e recuperar seus dados', () => {
     service.setToken({ id: '1', name: 'Cliente', email: 'cliente@example.com' });
 
@@ -21,6 +22,7 @@ describe('TokenAuth', () => {
     expect(service.getEmail()).toBe('cliente@example.com');
   });
 
+  // Garante que tokens ausentes, malformados ou modificados sejam recusados.
   it('deve rejeitar token ausente, incompleto ou adulterado', () => {
     expect(service.checkToken()).toBe(false);
     document.cookie = 'auth_token=invalid; path=/';
@@ -32,6 +34,7 @@ describe('TokenAuth', () => {
     expect(service.checkToken()).toBe(false);
   });
 
+  // Confirma o fallback para a sessão local quando o cookie não está disponível.
   it('deve usar a sessão quando o cookie não existe', () => {
     service.setToken({ id: '2', name: 'Sessão', email: 'sessao@example.com' });
     document.cookie = 'auth_token=; max-age=0; path=/';
@@ -41,6 +44,7 @@ describe('TokenAuth', () => {
     expect(service.getName()).toBe('Sessão');
   });
 
+  // Verifica a limpeza completa da autenticação no logout.
   it('deve excluir cookie e sessão ao apagar o token', () => {
     service.setToken({ id: '3', name: 'Cliente', email: 'cliente@example.com' });
     service.deleteToken();

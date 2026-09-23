@@ -15,6 +15,7 @@ describe('AddressService', () => {
     expect(service).toBeTruthy();
   });
 
+  // Confirma a leitura vazia, a persistência e a recuperação dos endereços do usuário.
   it('deve salvar, carregar e retornar lista vazia de endereços', () => {
     const addresses = [{
       id: 'address-1',

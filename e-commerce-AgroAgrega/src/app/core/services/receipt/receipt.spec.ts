@@ -30,6 +30,7 @@ describe('Receipt', () => {
     expect(service).toBeTruthy();
   });
 
+  // Exercita a montagem do PDF com endereço, complemento, múltiplos itens e resumo financeiro.
   it('deve gerar comprovante com itens longos e endereço completo', () => {
     const order = {
       id: 'order-1',
