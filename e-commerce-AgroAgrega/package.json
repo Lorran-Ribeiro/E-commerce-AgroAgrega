@@ -8,7 +8,8 @@
     "build:github": "ng build --configuration github-pages",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:e-commerce-AgroAgrega": "node dist/e-commerce-AgroAgrega/server/server.mjs"
+    "serve:ssr:e-commerce-AgroAgrega": "node dist/e-commerce-AgroAgrega/server/server.mjs",
+    "backend": "node --env-file=backend/.env backend/src/server.mjs"
   },
   "private": true,
   "packageManager": "npm@11.6.2",
@@ -27,6 +28,7 @@
     "crypto-js": "^4.2.0",
     "express": "^5.1.0",
     "jspdf": "^4.2.1",
+    "mercadopago": "^3.6.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

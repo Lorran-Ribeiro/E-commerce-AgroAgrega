@@ -2,9 +2,19 @@ import { isPlatformBrowser } from '@angular/common';
 import { Component, ElementRef, inject, PLATFORM_ID, ViewChild } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
-
 const bwipjs = {
-  toCanvas(canvas: HTMLCanvasElement, options: { bcid: string; text: string; scale?: number; padding?: number; backgroundcolor?: string; barcolor?: string; height?: number }): void {
+  toCanvas(
+    canvas: HTMLCanvasElement,
+    options: {
+      bcid: string;
+      text: string;
+      scale?: number;
+      padding?: number;
+      backgroundcolor?: string;
+      barcolor?: string;
+      height?: number;
+    },
+  ): void {
     const scale = options.scale ?? 2;
     const padding = options.padding ?? 0;
     const context = canvas.getContext('2d');
@@ -22,7 +32,6 @@ const bwipjs = {
     context.fillStyle = `#${options.barcolor ?? '000000'}`;
 
     if (isQrCode) {
-      
       for (let y = 0; y < size; y++) {
         for (let x = 0; x < size; x++) {
           const index = (x + y * size) % options.text.length;
@@ -54,6 +63,7 @@ import {
 } from '@angular/forms';
 
 import { OrderService } from '@core/services/order/order.service';
+import { PaymentApiService } from '@core/services/payment-api.service';
 import { CepService } from '@core/services/cep/cep';
 import { OrderPaymentMethod, OrderStatus } from '@models/order';
 import { AddressModel } from '@models/address.model';
@@ -71,6 +81,7 @@ export class CheckoutComponent {
   private cart = inject(Cart);
   private readonly cepService = inject(CepService);
   private orderService = inject(OrderService);
+  private readonly paymentApiService = inject(PaymentApiService);
   private auth = inject(Auth);
   private readonly addressService = inject(AddressService);
   private readonly platformId = inject(PLATFORM_ID);
@@ -463,6 +474,19 @@ export class CheckoutComponent {
 
     if (!paymentMethod) {
       this.checkoutForm.controls.paymentMethod.markAsTouched();
+      return;
+    }
+
+    if (paymentMethod === OrderPaymentMethod.CreditCard) {
+      this.paymentApiService.criarPedidoTeste().subscribe({
+        next: (payment) => {
+          window.location.href = payment.checkoutUrl;
+        },
+        error: (error) => {
+          console.error('Erro ao iniciar pagamento:', error);
+        },
+      });
+
       return;
     }
 
